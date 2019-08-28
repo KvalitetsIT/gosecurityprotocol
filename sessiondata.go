@@ -17,14 +17,16 @@ type SessionData struct {
 	Hash              string
 }
 
-type SessionDataFetcher func(string, SessionIdHandler) (*SessionData, error)
+type SessionDataFetcher interface {
+	GetSessionData(string, SessionIdHandler) (*SessionData, error)
+}
 
 
 type ServiceCallSessionDataFetcher struct {
 	SessionDataServiceEndpoint string
 }
 
-func (fetcher ServiceCallSessionDataFetcher) GetSessionDataFromService(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
+func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
 
 	client := &http.Client{}
 

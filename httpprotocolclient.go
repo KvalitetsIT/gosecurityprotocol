@@ -56,7 +56,7 @@ func (client HttpProtocolClient) Handle(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Get sessiondata
-	sessionData, err := client.sessionDataFetcher(sessionId, client.sessionIdHandler)
+	sessionData, err := client.sessionDataFetcher.GetSessionData(sessionId, client.sessionIdHandler)
         if (err != nil) {
                 return http.StatusInternalServerError, err
         }
