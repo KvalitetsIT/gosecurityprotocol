@@ -28,6 +28,19 @@ type HttpProtocolClient struct {
 	service			HttpHandler
 }
 
+func NewHttpProtocolClient(tokenCache *TokenCache, sessionIdHandler SessionIdHandler, sessionDataFetcher SessionDataFetcher, doClientAuthentication DoClientAuthentification, decorateRequest DecorateRequestWithAuthenticationToken, service HttpHandler) (*HttpProtocolClient) {
+
+	httpProtocolClient := new (HttpProtocolClient)
+	httpProtocolClient.tokenCache = tokenCache
+	httpProtocolClient.sessionIdHandler = sessionIdHandler
+	httpProtocolClient.sessionDataFetcher = sessionDataFetcher
+	httpProtocolClient.doClientAuthentication = doClientAuthentication
+	httpProtocolClient.decorateRequest = decorateRequest
+	httpProtocolClient.service = service
+
+	return httpProtocolClient
+}
+
 func (client HttpProtocolClient) Handle(w http.ResponseWriter, r *http.Request) (int, error) {
 
 	// Check for session id
