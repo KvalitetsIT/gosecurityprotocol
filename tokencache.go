@@ -88,16 +88,18 @@ func GetExpiryDate(expiresIn int64) time.Time {
 	return expiryTime
 }
 
-func (tokenCache *TokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) error {
+func (tokenCache *TokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
 	if (sessionId != "") {
                	expiryTime := GetExpiryDate(expires_in)
-		err := tokenCache.tokenCollection.Insert(&TokenData{Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  })
-		if err != nil {
+		tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
+		err := tokenCache.tokenCollection.Insert(tokenData)
+		if (err != nil) {
 			tokenCache.ReConnect()
-			return err
+			return nil, err
 		}
+		return tokenData, nil
 	}
-	return nil
+	return nil, nil
 }
 
 func (tokenCache *TokenCache) Close() {

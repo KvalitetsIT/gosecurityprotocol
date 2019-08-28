@@ -5,6 +5,7 @@ ENV GO111MODULE=on
 RUN mkdir /securityprotocol
 WORKDIR /securityprotocol
 RUN go mod init securityprotocol
+RUN go get gopkg.in/mgo.v2
 
 # Kitcaddy module source
 COPY . /securityprotocol/
