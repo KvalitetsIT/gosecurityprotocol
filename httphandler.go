@@ -22,13 +22,13 @@ type HttpHeaderSessionIdHandler struct {
 	HttpHeaderName	string
 }
 
-func (handler HttpHeaderSessionIdHandler) GetSessionIdFromHttpHeader(request *http.Request) string {
+func (handler HttpHeaderSessionIdHandler) GetSessionIdFromHttpRequest(request *http.Request) string {
 
 	sessionId := request.Header.Get(handler.HttpHeaderName)
 	return sessionId
 }
 
-func (handler HttpHeaderSessionIdHandler) SetSessionIdOnHttpHeader(sessionId string, request *http.Request)  {
+func (handler HttpHeaderSessionIdHandler) SetSessionIdOnHttpRequest(sessionId string, request *http.Request)  {
 
 	request.Header.Add(handler.HttpHeaderName, sessionId)
 }
