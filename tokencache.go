@@ -4,7 +4,13 @@ import "gopkg.in/mgo.v2"
 import "gopkg.in/mgo.v2/bson"
 import "time"
 
-type TokenCache struct {
+type TokenCache interface {
+	SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error)
+	FindTokenDataForSessionId(sessionId string) (*TokenData, error)
+}
+
+
+type MongoTokenCache struct {
 	mongoSession    *mgo.Session
 	tokenCollection *mgo.Collection
 	keyColumn	string
@@ -20,17 +26,17 @@ type TokenData struct {
 	Hash			string
 }
 
-func NewTokenCache(mongodb string, mongodb_database string, mongodb_collection string) (*TokenCache, error) {
+func NewTokenCache(mongodb string, mongodb_database string, mongodb_collection string) (*MongoTokenCache, error) {
 	tokenCache, err := newTokenCache(mongodb, mongodb_database, mongodb_collection, "token")
 	return tokenCache, err
 }
 
-func (tokenCache *TokenCache) ReConnect() {
+func (tokenCache *MongoTokenCache) ReConnect() {
 	tokenCache.mongoSession.Refresh()
 	tokenCache.tokenCollection = tokenCache.mongoSession.DB(tokenCache.dbName).C(tokenCache.collectionName)	
 }
 
-func newTokenCache(mongodb string, dbName string, collectionName string, keyColumn string) (*TokenCache, error) {
+func newTokenCache(mongodb string, dbName string, collectionName string, keyColumn string) (*MongoTokenCache, error) {
 
 	session, err := mgo.Dial(mongodb)
 	if err != nil {
@@ -66,10 +72,10 @@ func newTokenCache(mongodb string, dbName string, collectionName string, keyColu
 		return nil, err
         }
 
-        return &TokenCache{ mongoSession: session, tokenCollection: c, keyColumn: keyColumn, dbName: dbName, collectionName: collectionName }, nil
+        return &MongoTokenCache{ mongoSession: session, tokenCollection: c, keyColumn: keyColumn, dbName: dbName, collectionName: collectionName }, nil
 }
 
-func (tokenCache *TokenCache) FindTokenDataForSessionId(sessionId string) (*TokenData, error) {
+func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (*TokenData, error) {
 	if (sessionId == "") {
 		return nil, nil
 	}
@@ -88,7 +94,7 @@ func GetExpiryDate(expiresIn int64) time.Time {
 	return expiryTime
 }
 
-func (tokenCache *TokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
+func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
 	if (sessionId != "") {
                	expiryTime := GetExpiryDate(expires_in)
 		tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
@@ -102,6 +108,6 @@ func (tokenCache *TokenCache) SaveAuthenticationKeysForSessionId(sessionId strin
 	return nil, nil
 }
 
-func (tokenCache *TokenCache) Close() {
+func (tokenCache *MongoTokenCache) Close() {
 	tokenCache.mongoSession.Close()
 }

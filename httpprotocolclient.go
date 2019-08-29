@@ -17,7 +17,7 @@ type DecorateRequestWithAuthenticationToken func(tokenData *TokenData, r *http.R
 
 type HttpProtocolClient struct {
 
-	tokenCache      	*TokenCache
+	tokenCache      	TokenCache
 
 	sessionIdHandler	SessionIdHandler
 	sessionDataFetcher	SessionDataFetcher
@@ -28,7 +28,7 @@ type HttpProtocolClient struct {
 	service			HttpHandler
 }
 
-func NewHttpProtocolClient(tokenCache *TokenCache, sessionIdHandler SessionIdHandler, sessionDataFetcher SessionDataFetcher, doClientAuthentication DoClientAuthentification, decorateRequest DecorateRequestWithAuthenticationToken, service HttpHandler) (*HttpProtocolClient) {
+func NewHttpProtocolClient(tokenCache TokenCache, sessionIdHandler SessionIdHandler, sessionDataFetcher SessionDataFetcher, doClientAuthentication DoClientAuthentification, decorateRequest DecorateRequestWithAuthenticationToken, service HttpHandler) (*HttpProtocolClient) {
 
 	httpProtocolClient := new (HttpProtocolClient)
 	httpProtocolClient.tokenCache = tokenCache
