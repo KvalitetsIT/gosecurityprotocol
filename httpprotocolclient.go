@@ -2,6 +2,7 @@ package securityprotocol
 
 import (
         "net/http"
+	"fmt"
 )
 
 
@@ -52,12 +53,14 @@ func (client HttpProtocolClient) Handle(w http.ResponseWriter, r *http.Request) 
 	// Check if we have a token cached
 	tokenData, err := client.tokenCache.FindTokenDataForSessionId(sessionId)
 	if (err != nil) {
+		fmt.Println(fmt.Sprintf("Error in FindTokenDataForSessionId: %s", sessionId))
 		return http.StatusInternalServerError, err
 	}
 
 	// Get sessiondata
 	sessionData, err := client.sessionDataFetcher.GetSessionData(sessionId, client.sessionIdHandler)
         if (err != nil) {
+		fmt.Println(fmt.Sprintf("Error in GetSessionData: %s", sessionId))
                 return http.StatusInternalServerError, err
         }
 

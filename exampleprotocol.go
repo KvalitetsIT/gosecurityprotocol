@@ -4,21 +4,11 @@ import (
         "net/http"
 )
 
-type ExampleSessionIdHandler struct {
-
-}
-
-func (handler ExampleSessionIdHandler) GetSessionIdFromHttpRequest(request *http.Request) string {
-
-        return "test"
-}
-
-func (handler ExampleSessionIdHandler) SetSessionIdOnHttpRequest(sessionId string, request *http.Request)  {
-
-}
-
+const EXAMPLEPROTOCOL_HEADER_NAME = "examplesession"
 
 type ExampleSessionDataFetcher struct {
+
+	authorizationHook func(sessionData *SessionData) (*ClientAuthenticationInfo, error)
 
 }
 
@@ -32,19 +22,25 @@ func (fetcher ExampleSessionDataFetcher) GetSessionData(sessionId string, sessio
 
 func NewExampleClientProtocol(tokenCache TokenCache, service HttpHandler) (*HttpProtocolClient) {
 
-        sessionIdHandler := new(ExampleSessionIdHandler)
+	return NewExampleClientProtocolWithHooks(tokenCache, service, ExampleDoAuthenticationHook)
+}
+
+func NewExampleClientProtocolWithHooks(tokenCache TokenCache, service HttpHandler, clientAuthenticationInfo func(sessionData *SessionData) (*ClientAuthenticationInfo, error)) (*HttpProtocolClient) {
+
+        sessionIdHandler := &HttpHeaderSessionIdHandler{ HttpHeaderName: EXAMPLEPROTOCOL_HEADER_NAME }
 
         sessionDataFetcher := new(ExampleSessionDataFetcher)
 
-        protocolClient := NewHttpProtocolClient(tokenCache, sessionIdHandler, sessionDataFetcher, ExampleDoAuthenticationHook, ExampleDecorateRequestWithAuthenticationToken, service)
+        protocolClient := NewHttpProtocolClient(tokenCache, sessionIdHandler, sessionDataFetcher, clientAuthenticationInfo, ExampleDecorateRequestWithAuthenticationToken, service)
 
         return protocolClient
 }
 
 
+
 func ExampleDoAuthenticationHook(sessionData *SessionData) (*ClientAuthenticationInfo, error) {
 
-        // TODO
+        // Default implementation
         mock := new(ClientAuthenticationInfo)
         mock.Token = "mock"
         mock.ExpiresIn = 2000

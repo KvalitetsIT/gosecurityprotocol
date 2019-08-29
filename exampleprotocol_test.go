@@ -4,7 +4,7 @@ import (
         "testing"
 	"net/http"
 
-//        "gotest.tools/assert"
+        "gotest.tools/assert"
 )
 
 type MockTokenCache struct {
@@ -33,15 +33,44 @@ func (mock *MockService) Handle(http.ResponseWriter, *http.Request) (int, error)
 }
 
 
-func TestExampleProtocolWhenNoTokenIsFound(t *testing.T) {
+func TestExampleProtocolAnswersUnautorizedWhenNoSessionIdCanBeFound(t *testing.T) {
 
 	// Given
 	service := new(MockService)
 	tokenCache := new(MockTokenCache)
 	exampleClientProtocol := NewExampleClientProtocol(tokenCache, service)
+        req, _ := http.NewRequest("GET", "/someurl", nil)
 
         // When
-	exampleClientProtocol.Handle(nil, nil)
+	httpCode, err := exampleClientProtocol.Handle(nil, req)
 
 	// Then
+	assert.NilError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, httpCode)
 }
+
+func TestExampleProtocolStartsAutorizationIfNoTokenMatchingTheSessionIdCanBeFound(t *testing.T) {
+
+        // Given
+        service := new(MockService)
+        tokenCache := new(MockTokenCache)
+
+	authenticationCalled := false
+	authenticationHook := func(sessionData *SessionData) (*ClientAuthenticationInfo, error) {
+		authenticationCalled = true
+		return ExampleDoAuthenticationHook(sessionData)
+	}
+
+        exampleClientProtocol := NewExampleClientProtocolWithHooks(tokenCache, service, authenticationHook)
+        req, _ := http.NewRequest("GET", "/someurl", nil)
+
+
+        // When
+        httpCode, err := exampleClientProtocol.Handle(nil, req)
+
+        // Then
+        assert.NilError(t, err)
+        assert.Equal(t, http.StatusUnauthorized, httpCode)
+	assert.Equal(t, true, authenticationCalled)
+}
+
