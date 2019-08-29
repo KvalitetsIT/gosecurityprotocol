@@ -1,6 +1,7 @@
 package securityprotocol
 
 import (
+	"fmt"
 	"time"
 	"net/http"
 	"bytes"
@@ -31,7 +32,7 @@ func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, se
 	client := &http.Client{}
 
 	// Create request
-        req, err := http.NewRequest("GET", fetcher.SessionDataServiceEndpoint, nil)
+        req, err := http.NewRequest("GET", fmt.Sprintf("%s/getsessiondata", fetcher.SessionDataServiceEndpoint), nil)
         if (err != nil) {
                 return nil, err
         }
