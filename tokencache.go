@@ -80,7 +80,14 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 		return nil, nil
 	}
 	result := TokenData{}
-	err := tokenCache.tokenCollection.Find(bson.M{"sessionid": sessionId}).One(&result)
+	query := tokenCache.tokenCollection.Find(bson.M{"sessionid": sessionId})
+	count, err := query.Count()
+	if (err != nil) {
+		return nil, err
+	}
+	if (count > 0) {
+		err = query.One(&result)
+	}
 	if err != nil {
 		tokenCache.ReConnect()
 		return nil, err
