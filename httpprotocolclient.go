@@ -20,6 +20,8 @@ type PreAuthentication func(w http.ResponseWriter, r *http.Request, sessionData 
 
 type HttpProtocolClient struct {
 
+	matchHandler		MatchHandler
+
 	tokenCache      	TokenCache
 
 	sessionIdHandler	SessionIdHandler
@@ -32,9 +34,10 @@ type HttpProtocolClient struct {
 	service			HttpHandler
 }
 
-func NewHttpProtocolClient(tokenCache TokenCache, sessionIdHandler SessionIdHandler, sessionDataFetcher SessionDataFetcher, preAuthentication PreAuthentication, doClientAuthentication DoClientAuthentification, decorateRequest DecorateRequestWithAuthenticationToken, service HttpHandler) (*HttpProtocolClient) {
+func NewHttpProtocolClient(matchHandler MatchHandler, tokenCache TokenCache, sessionIdHandler SessionIdHandler, sessionDataFetcher SessionDataFetcher, preAuthentication PreAuthentication, doClientAuthentication DoClientAuthentification, decorateRequest DecorateRequestWithAuthenticationToken, service HttpHandler) (*HttpProtocolClient) {
 
 	httpProtocolClient := new (HttpProtocolClient)
+	httpProtocolClient.matchHandler = matchHandler
 	httpProtocolClient.tokenCache = tokenCache
 	httpProtocolClient.sessionIdHandler = sessionIdHandler
 	httpProtocolClient.sessionDataFetcher = sessionDataFetcher
@@ -47,6 +50,11 @@ func NewHttpProtocolClient(tokenCache TokenCache, sessionIdHandler SessionIdHand
 }
 
 func (client HttpProtocolClient) Handle(w http.ResponseWriter, r *http.Request) (int, error) {
+
+	if (!client.matchHandler(r)) {
+		// No match, just delegate
+		return client.service.Handle(w, r)
+	}
 
 	// Check for session id
 	sessionId := client.sessionIdHandler.GetSessionIdFromHttpRequest(r)

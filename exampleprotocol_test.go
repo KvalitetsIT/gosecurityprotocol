@@ -61,7 +61,7 @@ func TestExampleProtocolStartsAutorizationIfNoTokenMatchingTheSessionIdCanBeFoun
 		return ExampleDoAuthenticationHook(sessionData)
 	}
 
-        exampleClientProtocol := NewExampleClientProtocolWithHooks(tokenCache, service, ExamplePreAuthentication, authenticationHook)
+        exampleClientProtocol := NewExampleClientProtocolWithHooks(ExampleMatchHandler, tokenCache, service, ExamplePreAuthentication, authenticationHook)
         req, _ := http.NewRequest("GET", "/someurl", nil)
 	sessionId := "session-123-xyz-999999"
 	ExampleAddSessionIdToRequest(req, sessionId)
@@ -92,7 +92,7 @@ func TestExampleProtocolSkipsAuthenticationWhenPreAuthenticationCausesRedirect(t
 		return http.StatusTemporaryRedirect, fmt.Errorf(preAuthErrMsg)
 	}
 
-        exampleClientProtocol := NewExampleClientProtocolWithHooks(tokenCache, service, examplePreAuthentication, authenticationHook)
+        exampleClientProtocol := NewExampleClientProtocolWithHooks(ExampleMatchHandler, tokenCache, service, examplePreAuthentication, authenticationHook)
         req, _ := http.NewRequest("GET", "/someurl", nil)
         sessionId := "session-123-xyz-999999"
         ExampleAddSessionIdToRequest(req, sessionId)
@@ -106,3 +106,18 @@ func TestExampleProtocolSkipsAuthenticationWhenPreAuthenticationCausesRedirect(t
         assert.Equal(t, false, authenticationCalled)
 }
 
+func TestExampleProtocolSkipsUrlsThatShouldBeIgnored(t *testing.T) {
+
+        // Given
+        service := new(MockService)
+        tokenCache := new(MockTokenCache)
+        exampleClientProtocol := NewExampleClientProtocol(tokenCache, service)
+        req, _ := http.NewRequest("GET", "/someurl?skip=yes", nil)
+
+        // When
+        httpCode, err := exampleClientProtocol.Handle(nil, req)
+
+        // Then
+        assert.NilError(t, err)
+        assert.Equal(t, http.StatusOK, httpCode)
+}

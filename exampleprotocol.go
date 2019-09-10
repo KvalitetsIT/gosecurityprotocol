@@ -22,16 +22,16 @@ func (fetcher ExampleSessionDataFetcher) GetSessionData(sessionId string, sessio
 
 func NewExampleClientProtocol(tokenCache TokenCache, service HttpHandler) (*HttpProtocolClient) {
 
-	return NewExampleClientProtocolWithHooks(tokenCache, service, ExamplePreAuthentication, ExampleDoAuthenticationHook)
+	return NewExampleClientProtocolWithHooks(ExampleMatchHandler, tokenCache, service, ExamplePreAuthentication, ExampleDoAuthenticationHook)
 }
 
-func NewExampleClientProtocolWithHooks(tokenCache TokenCache, service HttpHandler, preAuthentication func(w http.ResponseWriter, r *http.Request, sessionData *SessionData) (int, error),clientAuthenticationInfo func(sessionData *SessionData) (*ClientAuthenticationInfo, error)) (*HttpProtocolClient) {
+func NewExampleClientProtocolWithHooks(matchHandler MatchHandler, tokenCache TokenCache, service HttpHandler, preAuthentication func(w http.ResponseWriter, r *http.Request, sessionData *SessionData) (int, error),clientAuthenticationInfo func(sessionData *SessionData) (*ClientAuthenticationInfo, error)) (*HttpProtocolClient) {
 
         sessionIdHandler := &HttpHeaderSessionIdHandler{ HttpHeaderName: EXAMPLEPROTOCOL_HEADER_NAME }
 
         sessionDataFetcher := new(ExampleSessionDataFetcher)
 
-        protocolClient := NewHttpProtocolClient(tokenCache, sessionIdHandler, sessionDataFetcher, preAuthentication, clientAuthenticationInfo, ExampleDecorateRequestWithAuthenticationToken, service)
+        protocolClient := NewHttpProtocolClient(matchHandler, tokenCache, sessionIdHandler, sessionDataFetcher, preAuthentication, clientAuthenticationInfo, ExampleDecorateRequestWithAuthenticationToken, service)
 
         return protocolClient
 }
@@ -62,3 +62,15 @@ func ExampleDecorateRequestWithAuthenticationToken(tokenData *TokenData, r *http
 func ExampleAddSessionIdToRequest(r *http.Request, sessionId string) {
 	r.Header.Add(EXAMPLEPROTOCOL_HEADER_NAME, sessionId)
 }
+
+// Example matcher matcher alt undtagen request med en 'skip' query parameter
+func ExampleMatchHandler (r *http.Request) bool {
+
+	keys, ok := r.URL.Query()["skip"]
+	if (ok && len(keys) > 0) {
+		return false
+	}
+
+        return true
+}
+
