@@ -3,7 +3,7 @@ package securityprotocol
 import (
         "testing"
 	"net/http"
-
+	"fmt"
         "gotest.tools/assert"
 )
 
@@ -61,16 +61,48 @@ func TestExampleProtocolStartsAutorizationIfNoTokenMatchingTheSessionIdCanBeFoun
 		return ExampleDoAuthenticationHook(sessionData)
 	}
 
-        exampleClientProtocol := NewExampleClientProtocolWithHooks(tokenCache, service, authenticationHook)
+        exampleClientProtocol := NewExampleClientProtocolWithHooks(tokenCache, service, ExamplePreAuthentication, authenticationHook)
         req, _ := http.NewRequest("GET", "/someurl", nil)
-
+	sessionId := "session-123-xyz-999999"
+	ExampleAddSessionIdToRequest(req, sessionId)
 
         // When
         httpCode, err := exampleClientProtocol.Handle(nil, req)
 
         // Then
         assert.NilError(t, err)
-        assert.Equal(t, http.StatusUnauthorized, httpCode)
+        assert.Equal(t, http.StatusOK, httpCode)
 	assert.Equal(t, true, authenticationCalled)
+}
+
+func TestExampleProtocolSkipsAuthenticationWhenPreAuthenticationCausesRedirect(t *testing.T) {
+
+        // Given
+        service := new(MockService)
+        tokenCache := new(MockTokenCache)
+
+        authenticationCalled := false
+        authenticationHook := func(sessionData *SessionData) (*ClientAuthenticationInfo, error) {
+                authenticationCalled = true
+                return ExampleDoAuthenticationHook(sessionData)
+        }
+
+	preAuthErrMsg := "Redirecting because we want to"
+	examplePreAuthentication := func(w http.ResponseWriter, r *http.Request, sessionData *SessionData) (int, error) {
+		return http.StatusTemporaryRedirect, fmt.Errorf(preAuthErrMsg)
+	}
+
+        exampleClientProtocol := NewExampleClientProtocolWithHooks(tokenCache, service, examplePreAuthentication, authenticationHook)
+        req, _ := http.NewRequest("GET", "/someurl", nil)
+        sessionId := "session-123-xyz-999999"
+        ExampleAddSessionIdToRequest(req, sessionId)
+
+        // When
+        httpCode, err := exampleClientProtocol.Handle(nil, req)
+
+        // Then
+        assert.Error(t, err, preAuthErrMsg)
+        assert.Equal(t, http.StatusTemporaryRedirect, httpCode)
+        assert.Equal(t, false, authenticationCalled)
 }
 

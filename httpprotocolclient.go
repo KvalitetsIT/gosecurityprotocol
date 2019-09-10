@@ -16,6 +16,8 @@ type DoClientAuthentification func(*SessionData) (*ClientAuthenticationInfo, err
 
 type DecorateRequestWithAuthenticationToken func(tokenData *TokenData, r *http.Request) error
 
+type PreAuthentication func(w http.ResponseWriter, r *http.Request, sessionData *SessionData) (int, error)
+
 type HttpProtocolClient struct {
 
 	tokenCache      	TokenCache
@@ -23,18 +25,20 @@ type HttpProtocolClient struct {
 	sessionIdHandler	SessionIdHandler
 	sessionDataFetcher	SessionDataFetcher
 
+	preAuthentication	PreAuthentication
 	doClientAuthentication	DoClientAuthentification
 	decorateRequest		DecorateRequestWithAuthenticationToken
 
 	service			HttpHandler
 }
 
-func NewHttpProtocolClient(tokenCache TokenCache, sessionIdHandler SessionIdHandler, sessionDataFetcher SessionDataFetcher, doClientAuthentication DoClientAuthentification, decorateRequest DecorateRequestWithAuthenticationToken, service HttpHandler) (*HttpProtocolClient) {
+func NewHttpProtocolClient(tokenCache TokenCache, sessionIdHandler SessionIdHandler, sessionDataFetcher SessionDataFetcher, preAuthentication PreAuthentication, doClientAuthentication DoClientAuthentification, decorateRequest DecorateRequestWithAuthenticationToken, service HttpHandler) (*HttpProtocolClient) {
 
 	httpProtocolClient := new (HttpProtocolClient)
 	httpProtocolClient.tokenCache = tokenCache
 	httpProtocolClient.sessionIdHandler = sessionIdHandler
 	httpProtocolClient.sessionDataFetcher = sessionDataFetcher
+	httpProtocolClient.preAuthentication = preAuthentication
 	httpProtocolClient.doClientAuthentication = doClientAuthentication
 	httpProtocolClient.decorateRequest = decorateRequest
 	httpProtocolClient.service = service
@@ -65,6 +69,14 @@ func (client HttpProtocolClient) Handle(w http.ResponseWriter, r *http.Request) 
         }
 
 	if (tokenData == nil || (tokenData.Hash != sessionData.Hash)) {
+
+		if (client.preAuthentication != nil) {
+			httpCode, err := client.preAuthentication(w, r, sessionData)
+			if (err != nil) {
+				return httpCode, err
+			}
+		}
+
 		// No token - or sessiondata has changed since issueing - run authentication (again)
 		authentication, err := client.doClientAuthentication(sessionData)
 		if (err != nil) {
