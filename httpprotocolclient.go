@@ -12,7 +12,7 @@ type ClientAuthenticationInfo struct {
         ExpiresIn       int64
 }
 
-type DoClientAuthentification func(*SessionData) (*ClientAuthenticationInfo, error)
+type DoClientAuthentification func(http.ResponseWriter, *http.Request, *SessionData) (*ClientAuthenticationInfo, int, error)
 
 type DecorateRequestWithAuthenticationToken func(tokenData *TokenData, r *http.Request) error
 
@@ -80,13 +80,13 @@ func (client HttpProtocolClient) Handle(w http.ResponseWriter, r *http.Request) 
 
 		if (client.preAuthentication != nil) {
 			httpCode, err := client.preAuthentication(w, r, sessionData)
-			if (err != nil) {
+			if (err != nil || httpCode > 0) {
 				return httpCode, err
 			}
 		}
 
-		// No token - or sessiondata has changed since issueing - run authentication (again)
-		authentication, err := client.doClientAuthentication(sessionData)
+		// No token - or sessiondata has changed since issueing - run authentication
+		authentication, authStatusCode, err := client.doClientAuthentication(w, r, sessionData)
 		if (err != nil) {
 			return http.StatusUnauthorized, nil
 		}
@@ -95,6 +95,11 @@ func (client HttpProtocolClient) Handle(w http.ResponseWriter, r *http.Request) 
 		if (err != nil) {
                         return http.StatusUnauthorized, nil
                 }
+
+		// Some response was generated during authentication (for instance a redirect) - we are done!
+		if (authStatusCode > 0) {
+			return authStatusCode, nil
+		}
 	}
 
 	// Add the authentication token to the request

@@ -56,9 +56,10 @@ func TestExampleProtocolStartsAutorizationIfNoTokenMatchingTheSessionIdCanBeFoun
         tokenCache := new(MockTokenCache)
 
 	authenticationCalled := false
-	authenticationHook := func(sessionData *SessionData) (*ClientAuthenticationInfo, error) {
+
+	authenticationHook := func(writer http.ResponseWriter, request *http.Request, sessionData *SessionData) (*ClientAuthenticationInfo, int, error) {
 		authenticationCalled = true
-		return ExampleDoAuthenticationHook(sessionData)
+		return ExampleDoAuthenticationHook(writer, request, sessionData)
 	}
 
         exampleClientProtocol := NewExampleClientProtocolWithHooks(ExampleMatchHandler, tokenCache, service, ExamplePreAuthentication, authenticationHook)
@@ -82,9 +83,9 @@ func TestExampleProtocolSkipsAuthenticationWhenPreAuthenticationCausesRedirect(t
         tokenCache := new(MockTokenCache)
 
         authenticationCalled := false
-        authenticationHook := func(sessionData *SessionData) (*ClientAuthenticationInfo, error) {
+        authenticationHook := func(w http.ResponseWriter, r *http.Request, sessionData *SessionData) (*ClientAuthenticationInfo, int, error) {
                 authenticationCalled = true
-                return ExampleDoAuthenticationHook(sessionData)
+                return ExampleDoAuthenticationHook(w, r, sessionData)
         }
 
 	preAuthErrMsg := "Redirecting because we want to"

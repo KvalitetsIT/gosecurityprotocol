@@ -25,7 +25,7 @@ func NewExampleClientProtocol(tokenCache TokenCache, service HttpHandler) (*Http
 	return NewExampleClientProtocolWithHooks(ExampleMatchHandler, tokenCache, service, ExamplePreAuthentication, ExampleDoAuthenticationHook)
 }
 
-func NewExampleClientProtocolWithHooks(matchHandler MatchHandler, tokenCache TokenCache, service HttpHandler, preAuthentication func(w http.ResponseWriter, r *http.Request, sessionData *SessionData) (int, error),clientAuthenticationInfo func(sessionData *SessionData) (*ClientAuthenticationInfo, error)) (*HttpProtocolClient) {
+func NewExampleClientProtocolWithHooks(matchHandler MatchHandler, tokenCache TokenCache, service HttpHandler, preAuthentication PreAuthentication, clientAuthenticationInfo DoClientAuthentification) (*HttpProtocolClient) {
 
         sessionIdHandler := &HttpHeaderSessionIdHandler{ HttpHeaderName: EXAMPLEPROTOCOL_HEADER_NAME }
 
@@ -39,18 +39,18 @@ func NewExampleClientProtocolWithHooks(matchHandler MatchHandler, tokenCache Tok
 
 func ExamplePreAuthentication(w http.ResponseWriter, r *http.Request, sessionData *SessionData) (int, error) {
 
-	return http.StatusTeapot, nil
+	return 0, nil
 }
 
 
-func ExampleDoAuthenticationHook(sessionData *SessionData) (*ClientAuthenticationInfo, error) {
+func ExampleDoAuthenticationHook(w http.ResponseWriter, r *http.Request, sessionData *SessionData) (*ClientAuthenticationInfo, int, error) {
 
         // Default implementation
         mock := new(ClientAuthenticationInfo)
         mock.Token = "mock"
         mock.ExpiresIn = 2000
 
-        return mock, nil
+        return mock, 0, nil
 }
 
 func ExampleDecorateRequestWithAuthenticationToken(tokenData *TokenData, r *http.Request) error {
