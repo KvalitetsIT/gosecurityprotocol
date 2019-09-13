@@ -16,6 +16,9 @@ pipeline {
 				}
 			}
 		}
+		stage('Build Docker image') {
+			docker.build("kvalitetsit/loginproxy-siemens-documentconsumer", "--network testenv_gosecurityprotocol -f Dockerfile .")
+		}
 
 	}
 	post {
