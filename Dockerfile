@@ -5,8 +5,18 @@ ENV GO111MODULE=on
 RUN mkdir /securityprotocol
 WORKDIR /securityprotocol
 RUN go mod init securityprotocol
+
+
+# Caching dependecies in Docker's layers
+RUN echo "replace github.com/russellhaering/goxmldsig => github.com/evtr/goxmldsig latest" >> go.mod
+
 RUN go get gopkg.in/mgo.v2
 RUN go get gotest.tools/assert
+RUN go get github.com/russellhaering/goxmldsig
+RUN go get github.com/russellhaering/gosaml2
+RUN go get github.com/google/uuid 
+
+RUN cat go.mod
 
 # Kitcaddy module source
 COPY . /securityprotocol/

@@ -1,11 +1,12 @@
 package securityprotocol
 
 import (
-	"fmt"
 	"time"
-	"net/http"
-	"bytes"
-	"encoding/json"
+	"sort"
+	"crypto/md5"
+	"io"
+	"encoding/base64"
+	uuid "github.com/google/uuid"
 )
 
 type SessionData struct {
@@ -22,36 +23,58 @@ type SessionDataFetcher interface {
 	GetSessionData(string, SessionIdHandler) (*SessionData, error)
 }
 
-
-type ServiceCallSessionDataFetcher struct {
-	SessionDataServiceEndpoint string
+type SessionDataCreator interface {
+	CreateSessionData() (*SessionData, error)
 }
 
-func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
 
-	client := &http.Client{}
+func CreateSessionData(token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
 
-	// Create request
-        req, err := http.NewRequest("GET", fmt.Sprintf("%s/getsessiondata", fetcher.SessionDataServiceEndpoint), nil)
-        if (err != nil) {
-                return nil, err
-        }
-	sessionIdHandler.SetSessionIdOnHttpRequest(sessionId, req)
+	sessionId := uuid.New().String()
 
-	// Make call
-        resp, err := client.Do(req)
-        if (err != nil) {
-                return nil, err
-        }
+	sessionData := SessionData { SessionId: sessionId, Token: token, UserAttributes: userAttributes, Timestamp: expiry }
+	sessionData.recalculateHash()
 
-	// Parse response
-        buffer := new(bytes.Buffer)
-        buffer.ReadFrom(resp.Body)
-        var result SessionData
-        err = json.Unmarshal(buffer.Bytes(), &result)
-        if (err != nil) {
-                return nil, err
-        }
+	return &sessionData, nil
+}
 
-        return &result, nil
+func (data *SessionData) recalculateHash() string {
+
+	s := data.SessionId
+	s = s + data.Token
+	s = s + data.Timestamp.Format(time.UnixDate)
+
+
+	userAttributeKeys := []string{}
+
+	for k, _ := range data.UserAttributes {
+		userAttributeKeys = append(userAttributeKeys, k)
+	}
+
+	sort.Strings(userAttributeKeys)
+
+	for _, k := range userAttributeKeys {
+		s = s + k
+		for _, v := range data.UserAttributes[k] {
+			s = s + v
+		}
+	}
+
+	sessionAttributeKeys := []string{}
+
+	for k, _ := range data.SessionAttributes {
+		sessionAttributeKeys = append(sessionAttributeKeys, k)
+	}
+
+	sort.Strings(sessionAttributeKeys)
+
+	for _, k := range sessionAttributeKeys {
+		s = s + k + data.SessionAttributes[k]
+	}
+
+	h := md5.New()
+	io.WriteString(h, s)
+	data.Hash = base64.URLEncoding.EncodeToString(h.Sum(nil))
+
+	return data.Hash
 }
