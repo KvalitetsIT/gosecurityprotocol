@@ -2,9 +2,6 @@ package securityprotocol
 
 import (
         "testing"
-	"net/http"
-	"fmt"
-	"time"
         "gotest.tools/assert"
 )
 
@@ -13,12 +10,24 @@ func TestMongoTokenCache(t *testing.T) {
 	// Given
 	mongoTokenCache, createErr := NewMongoTokenCache("mongo", "testdb", "testcoll")
 	sessionId := "session-1234"
+	testToken := "test-token"
+	testHash  := "hash-xyz"
 
         // When
-	tokenData, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, "test-token", 1000, "hash-xyz")
+	tokenDataSaved, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, testToken, 1000, testHash)
+	_, getErr := mongoTokenCache.FindTokenDataForSessionId(sessionId)
 
 	// Then
 	assert.NilError(t, createErr)
 	assert.NilError(t, saveErr)
+	assert.NilError(t, getErr)
+
+	assert.Equal(t, sessionId, tokenDataSaved.Sessionid)
+	assert.Equal(t, testToken, tokenDataSaved.Authenticationtoken)
+	assert.Equal(t, testHash, tokenDataSaved.Hash)
+
+//        assert.Equal(t, sessionId, tokenDataGet.Sessionid)
+ //       assert.Equal(t, testToken, tokenDataGet.Authenticationtoken)
+  //      assert.Equal(t, testHash, tokenDataGet.Hash)
 }
 

@@ -21,7 +21,7 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 	}
 
 	result := TokenData{}
-	_, err := tokenCache.MongoCache.FindTokenDataForSessionId("sessionid", sessionId, result)
+	_, err := tokenCache.MongoCache.FindTokenDataForSessionId("sessionid", sessionId, &result)
 	if (err != nil) {
 		return nil, err
 	}

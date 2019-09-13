@@ -19,7 +19,7 @@ func NewMongoCache(mongodb string, mongodb_database string, mongodb_collection s
 
 func (tokenCache *MongoCache) ReConnect() {
 	tokenCache.mongoSession.Refresh()
-	tokenCache.collection = tokenCache.mongoSession.DB(tokenCache.dbName).C(tokenCache.collectionName)	
+	tokenCache.collection = tokenCache.mongoSession.DB(tokenCache.dbName).C(tokenCache.collectionName)
 }
 
 func newCache(mongodb string, dbName string, collectionName string, keyColumn string) (*MongoCache, error) {
