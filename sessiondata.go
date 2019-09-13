@@ -30,7 +30,7 @@ type SessionDataCreator interface {
 func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
 
         sessionData := SessionData { TokenData: TokenData { Sessionid: id, Authenticationtoken: token, Timestamp: expiry}, UserAttributes: userAttributes, SessionAttributes: make(map[string]string) }
-        sessionData.recalculateHash()
+        sessionData.Hash = sessionData.CalculateHash()
 
         return &sessionData, nil
 }
@@ -46,24 +46,18 @@ func CreateSessionData(token string, userAttributes map[string][]string, expiry 
 func (data *SessionData) AddSessionAttribute(key string, value string) {
 
 	data.SessionAttributes[key] = value
-	data.recalculateHash()
+	data.Hash = data.CalculateHash()
 }
 
-func (data *SessionData) recalculateHash() string {
+func (data *SessionData) CalculateHash() string {
 
-	s := data.Sessionid
-	s = s + data.Authenticationtoken
-	s = s + data.Timestamp.Format(time.UnixDate)
-
+	s := data.TokenData.CalculateHash()
 
 	userAttributeKeys := []string{}
-
 	for k, _ := range data.UserAttributes {
 		userAttributeKeys = append(userAttributeKeys, k)
 	}
-
 	sort.Strings(userAttributeKeys)
-
 	for _, k := range userAttributeKeys {
 		s = s + k
 		for _, v := range data.UserAttributes[k] {
@@ -72,20 +66,17 @@ func (data *SessionData) recalculateHash() string {
 	}
 
 	sessionAttributeKeys := []string{}
-
 	for k, _ := range data.SessionAttributes {
 		sessionAttributeKeys = append(sessionAttributeKeys, k)
 	}
-
 	sort.Strings(sessionAttributeKeys)
-
 	for _, k := range sessionAttributeKeys {
 		s = s + k + data.SessionAttributes[k]
 	}
 
 	h := md5.New()
 	io.WriteString(h, s)
-	data.Hash = base64.StdEncoding.EncodeToString(h.Sum(nil))
+	hash := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	return data.Hash
+	return hash
 }
