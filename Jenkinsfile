@@ -1,8 +1,9 @@
 pipeline {
-	def app
-	def scmInfo
 
 	stages {
+		def app
+	        def scmInfo
+
 		stage('Clone repository') {
 			scmInfo = checkout scm
 		}
