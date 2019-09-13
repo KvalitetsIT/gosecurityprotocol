@@ -31,6 +31,20 @@ func NewSamlSessionDataCreator(assertionString string) (*SamlSessionDataCreator,
 func (creator SamlSessionDataCreator) CreateSessionData() (*SessionData, error) {
 
 	userAttributes := make(map[string][]string)
+	if (creator.samlAssertion != nil && creator.samlAssertion.AttributeStatement != nil) {
+
+		for _, samlAttribute := range creator.samlAssertion.AttributeStatement.Attributes {
+			userAttributeKey := samlAttribute.Name
+
+			userAttributeValues := make([]string, 0)
+
+			for _, samlAttributeValue := range samlAttribute.Values {
+
+				userAttributeValues = append(userAttributeValues, samlAttributeValue.Value)
+			}
+			userAttributes[userAttributeKey] = userAttributeValues
+		}
+	}
 
 	expiry := time.Now()
 
