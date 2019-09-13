@@ -61,7 +61,7 @@ func newCache(mongodb string, dbName string, collectionName string, keyColumn st
         return &MongoCache{ mongoSession: session, collection: c, keyColumn: keyColumn, dbName: dbName, collectionName: collectionName }, nil
 }
 
-func (tokenCache *MongoCache) FindTokenDataForSessionId(sessionKey string, sessionId string, object interface{}) (interface{}, error) {
+func (tokenCache *MongoCache) FindTokenDataForSessionId(sessionKey string, sessionId string, object *TokenData) (*TokenData, error) {
 	if (sessionId == "") {
 		return nil, nil
 	}
@@ -71,13 +71,13 @@ func (tokenCache *MongoCache) FindTokenDataForSessionId(sessionKey string, sessi
 		return nil, err
 	}
 	if (count > 0) {
-		err = query.One(&object)
+		err = query.One(object)
 	}
 	if err != nil {
 		tokenCache.ReConnect()
 		return nil, err
 	}
-	return &object, nil
+	return object, nil
 }
 
 func (tokenCache *MongoCache) Save(object interface{}) error {

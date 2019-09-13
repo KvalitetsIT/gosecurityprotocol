@@ -11,12 +11,10 @@ import (
 
 type SessionData struct {
 
-	SessionId         string
-	Token         	  string
+	TokenData
+
 	UserAttributes    map[string][]string
 	SessionAttributes map[string]string
-	Timestamp         time.Time
-	Hash              string
 }
 
 type SessionDataFetcher interface {
@@ -31,7 +29,7 @@ type SessionDataCreator interface {
 
 func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
 
-        sessionData := SessionData { SessionId: id, Token: token, UserAttributes: userAttributes, SessionAttributes: make(map[string]string), Timestamp: expiry }
+        sessionData := SessionData { TokenData: TokenData { Sessionid: id, Authenticationtoken: token, Timestamp: expiry}, UserAttributes: userAttributes, SessionAttributes: make(map[string]string) }
         sessionData.recalculateHash()
 
         return &sessionData, nil
@@ -53,8 +51,8 @@ func (data *SessionData) AddSessionAttribute(key string, value string) {
 
 func (data *SessionData) recalculateHash() string {
 
-	s := data.SessionId
-	s = s + data.Token
+	s := data.Sessionid
+	s = s + data.Authenticationtoken
 	s = s + data.Timestamp.Format(time.UnixDate)
 
 

@@ -33,9 +33,9 @@ func TestSamlSessionDataCreatorWithSamlAssertionSucceedsAndReturnsFullyInitializ
         assert.NilError(t, errSessionDataCreator)
 	assert.NilError(t, errSessionData)
 
-	assert.Equal(t, string(samlassertionAsBytes), samlSessionData.Token)
+	assert.Equal(t, string(samlassertionAsBytes), samlSessionData.Authenticationtoken)
 
-	assert.Equal(t, id, samlSessionData.SessionId)
+	assert.Equal(t, id, samlSessionData.Sessionid)
 
 	assert.Equal(t, len(samlSessionData.UserAttributes), 3)
 
