@@ -1,0 +1,7 @@
+version: '3'
+networks:
+  gosecurityprotocol:
+    driver: bridge
+services:
+   mongo:
+     image: mongo:3.3

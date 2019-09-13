@@ -4,6 +4,7 @@ import (
         "testing"
 	"net/http"
 	"fmt"
+	"time"
         "gotest.tools/assert"
 )
 
@@ -18,7 +19,7 @@ func (tokenCache *MockTokenCache) FindTokenDataForSessionId(sessionId string) (*
 
 func (tokenCache *MockTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
 
-	expiryTime := GetExpiryDate(expires_in)
+	expiryTime := time.Now() //GetExpiryDate(expires_in)
 	tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
 	return tokenData, nil
 }
