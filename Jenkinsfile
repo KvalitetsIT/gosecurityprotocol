@@ -22,7 +22,7 @@ pipeline {
 		always {
 
 			dir('testenv') {
-				sh 'docker-compose rm -s -f'
+				sh 'docker-compose rm -f'
 			}
 		}
 	}
