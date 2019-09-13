@@ -18,7 +18,9 @@ pipeline {
 		}
 		stage('Build Docker image') {
 			steps {
-				docker.build("kvalitetsit/loginproxy-siemens-documentconsumer", "--network testenv_gosecurityprotocol -f Dockerfile .")
+				script {
+					docker.build("kvalitetsit/loginproxy-siemens-documentconsumer", "--network testenv_gosecurityprotocol -f Dockerfile .")
+				}
 			}
 		}
 
