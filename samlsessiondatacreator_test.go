@@ -23,9 +23,10 @@ func TestSamlSessionDataCreatorWithSamlAssertionSucceedsAndReturnsFullyInitializ
 
         // Given
         samlassertionAsBytes, _ := ioutil.ReadFile("./testdata/saml-assertion-test.xml")
+	id := "my-test-id-0987654321"
 
         // When
-        samlSessionDataCreator, errSessionDataCreator := NewSamlSessionDataCreator(string(samlassertionAsBytes))
+        samlSessionDataCreator, errSessionDataCreator := NewSamlSessionDataCreatorWithId(id, string(samlassertionAsBytes))
 	samlSessionData, errSessionData := samlSessionDataCreator.CreateSessionData()
 
         // Then
@@ -33,6 +34,8 @@ func TestSamlSessionDataCreatorWithSamlAssertionSucceedsAndReturnsFullyInitializ
 	assert.NilError(t, errSessionData)
 
 	assert.Equal(t, string(samlassertionAsBytes), samlSessionData.Token)
+
+	assert.Equal(t, id, samlSessionData.SessionId)
 
 	assert.Equal(t, len(samlSessionData.UserAttributes), 3)
 
@@ -45,5 +48,7 @@ func TestSamlSessionDataCreatorWithSamlAssertionSucceedsAndReturnsFullyInitializ
 
         assert.Equal(t, len(samlSessionData.UserAttributes["uid"]), 1)
         assert.Equal(t, samlSessionData.UserAttributes["uid"][0], "test")
+
+	assert.Equal(t, samlSessionData.Hash, "/6dUhUz4nogqUhLu1KDjNg==")
 }
 

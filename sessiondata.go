@@ -28,14 +28,27 @@ type SessionDataCreator interface {
 }
 
 
+
+func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
+
+        sessionData := SessionData { SessionId: id, Token: token, UserAttributes: userAttributes, SessionAttributes: make(map[string]string), Timestamp: expiry }
+        sessionData.recalculateHash()
+
+        return &sessionData, nil
+}
+
+
+
 func CreateSessionData(token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
 
-	sessionId := uuid.New().String()
+	id := uuid.New().String()
+	return CreateSessionDataWithId(id, token, userAttributes, expiry)
+}
 
-	sessionData := SessionData { SessionId: sessionId, Token: token, UserAttributes: userAttributes, Timestamp: expiry }
-	sessionData.recalculateHash()
+func (data *SessionData) AddSessionAttribute(key string, value string) {
 
-	return &sessionData, nil
+	data.SessionAttributes[key] = value
+	data.recalculateHash()
 }
 
 func (data *SessionData) recalculateHash() string {
@@ -74,7 +87,7 @@ func (data *SessionData) recalculateHash() string {
 
 	h := md5.New()
 	io.WriteString(h, s)
-	data.Hash = base64.URLEncoding.EncodeToString(h.Sum(nil))
+	data.Hash = base64.StdEncoding.EncodeToString(h.Sum(nil))
 
 	return data.Hash
 }
