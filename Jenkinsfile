@@ -8,11 +8,25 @@ node {
 
 	stage('Startup the testenvironment used by the integration tests') {
 		dir('testenv') {
-			sh 'docker-compose up'
+			sh 'docker-compose up -d'
 		}
 	}
 
 	stage('Build Docker image') {
             app = docker.build("kvalitetsit/loginproxy-siemens-documentconsumer:${scmInfo.GIT_COMMIT}", "--network testenv_gosecurityprotocol -f Dockerfile .")
 	}
+
+	post {
+		always {
+
+			stage('Stop and remove the testenvironment used by the integration tests') {
+			
+				dir('testenv') {
+					sh 'docker-compose rm -sf'
+				}
+			}
+		}
+	}
+    }
+
 }
