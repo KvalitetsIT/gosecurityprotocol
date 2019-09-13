@@ -22,6 +22,7 @@ pipeline {
 		always {
 
 			dir('testenv') {
+				sh 'docker-compose stop'
 				sh 'docker-compose rm -f'
 			}
 		}
