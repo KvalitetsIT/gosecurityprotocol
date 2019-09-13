@@ -8,7 +8,7 @@ node {
 
 	stage('Startup the testenvironment used by the integration tests') {
 		dir('testenv') {
-			sh './docker-compose up'
+			sh 'docker-compose up'
 		}
 	}
 
