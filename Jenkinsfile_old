@@ -1,9 +1,11 @@
 pipeline {
 
 	stages {
+		def app
+	        def scmInfo
 
 		stage('Clone repository') {
-			checkout scm
+			scmInfo = checkout scm
 		}
 
 		stage('Startup the testenvironment used by the integration tests') {
@@ -13,7 +15,7 @@ pipeline {
 		}
 
 		stage('Build Docker image') {
-			docker.build("kvalitetsit/loginproxy-siemens-documentconsumer", "--network testenv_gosecurityprotocol -f Dockerfile .")
+			app = docker.build("kvalitetsit/loginproxy-siemens-documentconsumer:${scmInfo.GIT_COMMIT}", "--network testenv_gosecurityprotocol -f Dockerfile .")
 		}
 	}
 	post {
