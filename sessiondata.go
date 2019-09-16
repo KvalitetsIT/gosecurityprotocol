@@ -80,3 +80,11 @@ func (data *SessionData) CalculateHash() string {
 
 	return hash
 }
+
+type NilSessionDataFetcher struct {
+}
+
+func (fetcher NilSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
+	return nil, nil
+}
+
