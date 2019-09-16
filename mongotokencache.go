@@ -21,12 +21,12 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 	}
 
 	result := TokenData{}
-	_, err := tokenCache.MongoCache.FindTokenDataForSessionId("sessionid", sessionId, &result)
+	findResult, err := tokenCache.MongoCache.FindTokenDataForSessionId("sessionid", sessionId, &result)
 	if (err != nil) {
 		return nil, err
 	}
 
-	return &result, nil
+	return findResult, nil
 }
 
 func getExpiryDate(expiresIn int64) time.Time {

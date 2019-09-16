@@ -70,10 +70,12 @@ func (tokenCache *MongoCache) FindTokenDataForSessionId(sessionKey string, sessi
 	if (err != nil) {
 		return nil, err
 	}
-	if (count > 0) {
+	if (count == 1) {
 		err = query.One(object)
+	} else {
+		return nil, nil
 	}
-	if err != nil {
+	if (err != nil) {
 		tokenCache.ReConnect()
 		return nil, err
 	}
