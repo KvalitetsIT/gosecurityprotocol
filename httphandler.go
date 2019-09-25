@@ -25,6 +25,9 @@ type HttpHeaderSessionIdHandler struct {
 func (handler HttpHeaderSessionIdHandler) GetSessionIdFromHttpRequest(request *http.Request) string {
 
 	sessionId := request.Header.Get(handler.HttpHeaderName)
+	if (len(sessionId) == 0) {
+		sessionId = request.Cookie(handler.HttpHeaderName)
+	}
 	return sessionId
 }
 
