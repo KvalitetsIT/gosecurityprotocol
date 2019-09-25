@@ -26,7 +26,7 @@ func (handler HttpHeaderSessionIdHandler) GetSessionIdFromHttpRequest(request *h
 
 	sessionId := request.Header.Get(handler.HttpHeaderName)
 	if (len(sessionId) == 0) {
-		sessionId = request.Cookie(handler.HttpHeaderName)
+		sessionId, _ = request.Cookie(handler.HttpHeaderName)
 	}
 	return sessionId
 }
