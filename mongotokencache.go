@@ -37,6 +37,11 @@ func getExpiryDate(expiresIn int64) time.Time {
 
 func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
 	if (sessionId != "") {
+		existing, _ := tokenCache.FindTokenDataForSessionId(sessionId)
+		if (existing != nil) {
+			tokenCache.MongoCache.Delete(existing)
+		}
+
                	expiryTime := getExpiryDate(expires_in)
 		tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
 		err := tokenCache.MongoCache.Save(tokenData)

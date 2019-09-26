@@ -13,9 +13,11 @@ func TestMongoTokenCache(t *testing.T) {
 	mongoTokenCache, createErr := NewMongoTokenCache("mongo", "testdb", "testcoll")
 	sessionId := fmt.Sprintf("sessionid-%s", uuid.New().String())
 	testToken := "test-token"
+	firstToken:= "first-token"
 	testHash  := fmt.Sprintf("hash-xyz-%s", uuid.New().String())
 
         // When
+        tokenDataFirst, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, firstToken, 2000, "first hash")
 	tokenDataSaved, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, testToken, 1000, testHash)
 	tokenDataGet, getErr := mongoTokenCache.FindTokenDataForSessionId(sessionId)
 
@@ -23,6 +25,8 @@ func TestMongoTokenCache(t *testing.T) {
 	assert.NilError(t, createErr)
 	assert.NilError(t, saveErr)
 	assert.NilError(t, getErr)
+
+	assert.Equal(t, firstToken, tokenDataFirst.Authenticationtoken)
 
 	assert.Equal(t, sessionId, tokenDataSaved.Sessionid)
 	assert.Equal(t, testToken, tokenDataSaved.Authenticationtoken)
@@ -32,4 +36,3 @@ func TestMongoTokenCache(t *testing.T) {
         assert.Equal(t, testToken, tokenDataGet.Authenticationtoken)
         assert.Equal(t, testHash, tokenDataGet.Hash)
 }
-

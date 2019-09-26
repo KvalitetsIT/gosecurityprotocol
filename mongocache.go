@@ -82,6 +82,15 @@ func (tokenCache *MongoCache) FindTokenDataForSessionId(sessionKey string, sessi
 	return object, nil
 }
 
+func (tokenCache *MongoCache) Delete(object interface{}) error {
+        err := tokenCache.collection.Remove(object)
+        if (err != nil) {
+                tokenCache.ReConnect()
+                return err
+        }
+        return nil
+}
+
 func (tokenCache *MongoCache) Save(object interface{}) error {
 	err := tokenCache.collection.Insert(object)
 	if (err != nil) {
