@@ -8,22 +8,26 @@ import (
 )
 
 type ServiceCallSessionDataFetcher struct {
-	SessionDataServiceEndpoint string
+	sessionDataServiceEndpoint string
+	client *http.Client
+}
+
+func NewServiceCallSessionDataFetcher(sessionDataServiceEndpoint string, client *http.Client) *ServiceCallSessionDataFetcher {
+
+	return &ServiceCallSessionDataFetcher{ sessionDataServiceEndpoint: sessionDataServiceEndpoint, client: client}
 }
 
 func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
 
-	client := &http.Client{}
-
 	// Create request
-        req, err := http.NewRequest("GET", fmt.Sprintf("%s/getsessiondata", fetcher.SessionDataServiceEndpoint), nil)
+        req, err := http.NewRequest("GET", fmt.Sprintf("%s/getsessiondata", fetcher.sessionDataServiceEndpoint), nil)
         if (err != nil) {
                 return nil, err
         }
 	sessionIdHandler.SetSessionIdOnHttpRequest(sessionId, req)
 
 	// Make call
-        resp, err := client.Do(req)
+        resp, err := fetcher.client.Do(req)
         if (err != nil) {
                 return nil, err
         }
