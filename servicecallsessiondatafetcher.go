@@ -7,6 +7,13 @@ import (
 	"encoding/json"
 )
 
+type SessionDataDto struct {
+
+	SessionData
+
+	SamlToken	string
+}
+
 type ServiceCallSessionDataFetcher struct {
 	sessionDataServiceEndpoint string
 	client *http.Client
@@ -17,7 +24,7 @@ func NewServiceCallSessionDataFetcher(sessionDataServiceEndpoint string, client 
 	return &ServiceCallSessionDataFetcher{ sessionDataServiceEndpoint: sessionDataServiceEndpoint, client: client}
 }
 
-func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
+func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionDataDto, error) {
 
 	// Create request
         req, err := http.NewRequest("GET", fmt.Sprintf("%s/getsessiondata", fetcher.sessionDataServiceEndpoint), nil)
@@ -35,7 +42,7 @@ func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, se
 	// Parse response
         buffer := new(bytes.Buffer)
         buffer.ReadFrom(resp.Body)
-        var result SessionData
+        var result SessionDataDto
         err = json.Unmarshal(buffer.Bytes(), &result)
         if (err != nil) {
                 return nil, err
