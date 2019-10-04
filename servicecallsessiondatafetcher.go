@@ -24,7 +24,7 @@ func NewServiceCallSessionDataFetcher(sessionDataServiceEndpoint string, client 
 	return &ServiceCallSessionDataFetcher{ sessionDataServiceEndpoint: sessionDataServiceEndpoint, client: client}
 }
 
-func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionDataDto, error) {
+func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
 
 	// Create request
         req, err := http.NewRequest("GET", fmt.Sprintf("%s/getsessiondata", fetcher.sessionDataServiceEndpoint), nil)
@@ -47,6 +47,9 @@ func (fetcher ServiceCallSessionDataFetcher) GetSessionData(sessionId string, se
         if (err != nil) {
                 return nil, err
         }
+	if (len(result.SamlToken) > 0) {
+		result.SessionData.Authenticationtoken =  result.SamlToken
+	}
 
-        return &result, nil
+        return &(result.SessionData), nil
 }
