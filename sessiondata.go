@@ -25,6 +25,11 @@ type SessionDataCreator interface {
 	CreateSessionData() (*SessionData, error)
 }
 
+type SessionCache interface {
+        SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*SessionData, error)
+        FindSessionDataForSessionId(sessionId string) (*SessionData, error)
+}
+
 
 
 func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
@@ -34,8 +39,6 @@ func CreateSessionDataWithId(id string, token string, userAttributes map[string]
 
         return &sessionData, nil
 }
-
-
 
 func CreateSessionData(token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
 

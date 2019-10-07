@@ -15,7 +15,7 @@ type TokenCache interface {
 
 type TokenData struct {
 	ID       		bson.ObjectId `bson:"_id,omitempty"`
-	Sessionid      		string
+	Sessionid      		string `bson:"sessionid"`
 	Authenticationtoken	string
 	Timestamp 		time.Time `bson:"timestamp"`
 	Hash			string

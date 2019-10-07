@@ -17,9 +17,9 @@ func NewMongoCache(mongodb string, mongodb_database string, mongodb_collection s
 	return tokenCache, err
 }
 
-func (tokenCache *MongoCache) ReConnect() {
-	tokenCache.mongoSession.Refresh()
-	tokenCache.collection = tokenCache.mongoSession.DB(tokenCache.dbName).C(tokenCache.collectionName)
+func (mongoCache *MongoCache) ReConnect() {
+	mongoCache.mongoSession.Refresh()
+	mongoCache.collection = mongoCache.mongoSession.DB(mongoCache.dbName).C(mongoCache.collectionName)
 }
 
 func newCache(mongodb string, dbName string, collectionName string, keyColumn string) (*MongoCache, error) {
@@ -61,45 +61,52 @@ func newCache(mongodb string, dbName string, collectionName string, keyColumn st
         return &MongoCache{ mongoSession: session, collection: c, keyColumn: keyColumn, dbName: dbName, collectionName: collectionName }, nil
 }
 
-func (tokenCache *MongoCache) FindTokenDataForSessionId(sessionKey string, sessionId string, object *TokenData) (*TokenData, error) {
+func (mongoCache *MongoCache) FindDataForSessionId(sessionKey string, sessionId string, object interface{}) error {
 	if (sessionId == "") {
-		return nil, nil
+		return nil
 	}
-	query := tokenCache.collection.Find(bson.M{sessionKey: sessionId})
+	query := mongoCache.collection.Find(bson.M{sessionKey: sessionId})
 	count, err := query.Count()
 	if (err != nil) {
-		return nil, err
+		return err
 	}
 	if (count == 1) {
 		err = query.One(object)
 	} else {
-		return nil, nil
+		return nil
 	}
 	if (err != nil) {
-		tokenCache.ReConnect()
-		return nil, err
-	}
-	return object, nil
-}
-
-func (tokenCache *MongoCache) Delete(object interface{}) error {
-        err := tokenCache.collection.Remove(object)
-        if (err != nil) {
-                tokenCache.ReConnect()
-                return err
-        }
-        return nil
-}
-
-func (tokenCache *MongoCache) Save(object interface{}) error {
-	err := tokenCache.collection.Insert(object)
-	if (err != nil) {
-		tokenCache.ReConnect()
+		mongoCache.ReConnect()
 		return err
 	}
 	return nil
 }
 
-func (tokenCache *MongoCache) Close() {
-	tokenCache.mongoSession.Close()
+func (mongoCache *MongoCache) Delete(object interface{}) error {
+        err := mongoCache.collection.Remove(object)
+        if (err != nil) {
+                mongoCache.ReConnect()
+                return err
+        }
+        return nil
 }
+
+func (mongoCache *MongoCache) Save(object interface{}) error {
+	err := mongoCache.collection.Insert(object)
+	if (err != nil) {
+		mongoCache.ReConnect()
+		return err
+	}
+	return nil
+}
+
+func (mongoCache *MongoCache) Close() {
+	mongoCache.mongoSession.Close()
+}
+
+func GetExpiryDate(expiresIn int64) time.Time {
+
+        expiryTime := time.Now().Add(time.Duration(expiresIn) * time.Millisecond)
+        return expiryTime
+}
+

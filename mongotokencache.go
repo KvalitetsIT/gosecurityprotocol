@@ -1,14 +1,13 @@
 package securityprotocol
 
 import "fmt"
-import "time"
 
 type MongoTokenCache struct {
 	MongoCache	*MongoCache
 }
 
 func NewMongoTokenCache(mongodb string, mongodb_database string, mongodb_collection string) (*MongoTokenCache, error) {
-	mongoCache, err := NewMongoCache(mongodb, mongodb_database, mongodb_collection, "token")
+	mongoCache, err := NewMongoCache(mongodb, mongodb_database, mongodb_collection, "sessionid")
 	if (err != nil) {
 		return nil, err
 	}
@@ -21,18 +20,12 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 	}
 
 	result := TokenData{}
-	findResult, err := tokenCache.MongoCache.FindTokenDataForSessionId("sessionid", sessionId, &result)
+	err := tokenCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &result)
 	if (err != nil) {
 		return nil, err
 	}
 
-	return findResult, nil
-}
-
-func getExpiryDate(expiresIn int64) time.Time {
-
-        expiryTime := time.Now().Add(time.Duration(expiresIn) * time.Millisecond)
-        return expiryTime
+	return &result, nil
 }
 
 func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
@@ -42,7 +35,7 @@ func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId 
 			tokenCache.MongoCache.Delete(existing)
 		}
 
-               	expiryTime := getExpiryDate(expires_in)
+               	expiryTime := GetExpiryDate(expires_in)
 		tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
 		err := tokenCache.MongoCache.Save(tokenData)
 		if (err != nil) {
