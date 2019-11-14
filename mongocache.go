@@ -61,25 +61,25 @@ func newCache(mongodb string, dbName string, collectionName string, keyColumn st
         return &MongoCache{ mongoSession: session, collection: c, keyColumn: keyColumn, dbName: dbName, collectionName: collectionName }, nil
 }
 
-func (mongoCache *MongoCache) FindDataForSessionId(sessionKey string, sessionId string, object interface{}) error {
+func (mongoCache *MongoCache) FindDataForSessionId(sessionKey string, sessionId string, object interface{}) (interface{}, error) {
 	if (sessionId == "") {
-		return nil
+		return nil, nil
 	}
 	query := mongoCache.collection.Find(bson.M{sessionKey: sessionId})
 	count, err := query.Count()
 	if (err != nil) {
-		return err
+		return nil, err
 	}
 	if (count == 1) {
 		err = query.One(object)
 	} else {
-		return nil
+		return nil, nil
 	}
 	if (err != nil) {
 		mongoCache.ReConnect()
-		return err
+		return nil, err
 	}
-	return nil
+	return object, nil
 }
 
 func (mongoCache *MongoCache) Delete(object interface{}) error {

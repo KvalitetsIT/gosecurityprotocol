@@ -21,10 +21,12 @@ func (sessionCache *MongoSessionCache) FindSessionDataForSessionId(sessionId str
 	}
 
 	result := SessionData{}
-	err := sessionCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &result)
+	found, err := sessionCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &result)
 	if (err != nil) {
 		return nil, err
 	}
+
+	result, _ = found.(SessionData)
 
 	return &result, nil
 }

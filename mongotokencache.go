@@ -20,17 +20,27 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 	}
 
 	result := TokenData{}
-	err := tokenCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &result)
+	found, err := tokenCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &result)
 	if (err != nil) {
 		return nil, err
 	}
+	if (found == nil) {
+		return nil, nil
+	}
 
-	return &result, nil
+	result, ok := found.(TokenData)
+	if (ok) {
+		return &result, nil
+	}
+	return nil, nil
 }
 
 func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
 	if (sessionId != "") {
-		existing, _ := tokenCache.FindTokenDataForSessionId(sessionId)
+		existing, findErr := tokenCache.FindTokenDataForSessionId(sessionId)
+		if (findErr != nil) {
+			return nil, findErr
+		}
 		if (existing != nil) {
 			tokenCache.MongoCache.Delete(existing)
 		}
