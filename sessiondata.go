@@ -28,7 +28,7 @@ type SessionDataCreator interface {
 }
 
 type SessionCache interface {
-        SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*SessionData, error)
+        SaveSessionData(*SessionData) error
         FindSessionDataForSessionId(sessionId string) (*SessionData, error)
 }
 

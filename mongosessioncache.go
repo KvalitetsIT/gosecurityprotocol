@@ -35,20 +35,16 @@ func (sessionCache *MongoSessionCache) FindSessionDataForSessionId(sessionId str
         return nil, nil
 }
 
-func (sessionCache *MongoSessionCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*SessionData, error) {
+func (sessionCache *MongoSessionCache) SaveSessionData(sessionData *SessionData) error {
+	sessionId := sessionData.Sessionid
 	if (sessionId != "") {
 		existing, _ := sessionCache.FindSessionDataForSessionId(sessionId)
 		if (existing != nil) {
 			sessionCache.MongoCache.Delete(existing)
 		}
 
-               	expiryTime := GetExpiryDate(expires_in)
-		sessionData := &SessionData{ TokenData: TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  } }
 		err := sessionCache.MongoCache.Save(sessionData)
-		if (err != nil) {
-			return nil, err
-		}
-		return sessionData, nil
+		return err
 	}
-	return nil, fmt.Errorf("sessionId cannot be empty")
+	return fmt.Errorf("sessionId cannot be empty")
 }
