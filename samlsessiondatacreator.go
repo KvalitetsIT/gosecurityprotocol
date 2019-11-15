@@ -12,9 +12,16 @@ type SamlSessionDataCreator struct {
 
 	id		string
 
-	tokenAsString	string
-
 	samlAssertion	*saml2.Assertion
+
+	tokenAsString string
+
+	clientCertificateHash string
+}
+
+func NewSamlSessionDataCreator(assertionString string) (*SamlSessionDataCreator, error) {
+
+        return NewSamlSessionDataCreatorWithId("", assertionString)
 }
 
 func NewSamlSessionDataCreatorWithId(id string, assertionString string) (*SamlSessionDataCreator, error) {
@@ -26,13 +33,13 @@ func NewSamlSessionDataCreatorWithId(id string, assertionString string) (*SamlSe
                 return nil, err
         }
 
-        return &SamlSessionDataCreator { id: id, tokenAsString: assertionString, samlAssertion: &assertion }, nil
+	return NewSamlSessionDataCreatorWithAssertionAndClientCert(id, assertionString, &assertion, "")
 }
 
+func NewSamlSessionDataCreatorWithAssertionAndClientCert(id string, assertionString string, samlAssertion *saml2.Assertion, clientCertificateHash string) (*SamlSessionDataCreator, error) {
 
-func NewSamlSessionDataCreator(assertionString string) (*SamlSessionDataCreator, error) {
 
-	return NewSamlSessionDataCreatorWithId("", assertionString)
+	return &SamlSessionDataCreator { id: id, tokenAsString: assertionString, samlAssertion: samlAssertion, clientCertificateHash: clientCertificateHash }, nil
 }
 
 
@@ -60,8 +67,8 @@ func (creator SamlSessionDataCreator) CreateSessionData() (*SessionData, error) 
 	}
 
 	if (creator.id == "") {
-		return CreateSessionData(creator.tokenAsString, userAttributes, expiry)
+		return CreateSessionData(creator.tokenAsString, userAttributes, expiry, creator.clientCertificateHash)
 	} else {
-		return CreateSessionDataWithId(creator.id, creator.tokenAsString, userAttributes, expiry)
+		return CreateSessionDataWithId(creator.id, creator.tokenAsString, userAttributes, expiry, creator.clientCertificateHash)
 	}
 }

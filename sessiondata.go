@@ -15,6 +15,8 @@ type SessionData struct {
 
 	UserAttributes    map[string][]string
 	SessionAttributes map[string]string
+
+	ClientCertHash string
 }
 
 type SessionDataFetcher interface {
@@ -32,18 +34,19 @@ type SessionCache interface {
 
 
 
-func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
+func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time, clientCertHash string) (*SessionData, error) {
 
         sessionData := SessionData { TokenData: TokenData { Sessionid: id, Authenticationtoken: token, Timestamp: expiry}, UserAttributes: userAttributes, SessionAttributes: make(map[string]string) }
         sessionData.Hash = sessionData.CalculateHash()
+	sessionData.ClientCertHash = clientCertHash
 
         return &sessionData, nil
 }
 
-func CreateSessionData(token string, userAttributes map[string][]string, expiry time.Time) (*SessionData, error) {
+func CreateSessionData(token string, userAttributes map[string][]string, expiry time.Time, clientCertHash string) (*SessionData, error) {
 
 	id := uuid.New().String()
-	return CreateSessionDataWithId(id, token, userAttributes, expiry)
+	return CreateSessionDataWithId(id, token, userAttributes, expiry, clientCertHash)
 }
 
 func (data *SessionData) AddSessionAttribute(key string, value string) {
