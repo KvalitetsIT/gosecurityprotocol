@@ -20,15 +20,19 @@ func (sessionCache *MongoSessionCache) FindSessionDataForSessionId(sessionId str
 		return nil, fmt.Errorf("Session id cannot be empty")
 	}
 
-	result := SessionData{}
-	found, err := sessionCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &result)
-	if (err != nil) {
+	// Query Mongo
+	querySessionData := SessionData{}
+	found, err := sessionCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &querySessionData)
+	if (err != nil || found == nil) {
 		return nil, err
 	}
 
-	result, _ = found.(SessionData)
-
-	return &result, nil
+	// Safely cast to SessionData
+ 	result, ok := found.(*SessionData)
+        if (ok) {
+                return result, nil
+        }
+        return nil, nil
 }
 
 func (sessionCache *MongoSessionCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*SessionData, error) {

@@ -2,12 +2,14 @@ package securityprotocol
 
 import "fmt"
 
+const MONGO_TOKEN_CACHE_ID_COLUMN = "sessionid"
+
 type MongoTokenCache struct {
 	MongoCache	*MongoCache
 }
 
 func NewMongoTokenCache(mongodb string, mongodb_database string, mongodb_collection string) (*MongoTokenCache, error) {
-	mongoCache, err := NewMongoCache(mongodb, mongodb_database, mongodb_collection, "sessionid")
+	mongoCache, err := NewMongoCache(mongodb, mongodb_database, mongodb_collection, MONGO_TOKEN_CACHE_ID_COLUMN)
 	if (err != nil) {
 		return nil, err
 	}
@@ -19,18 +21,17 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 		return nil, fmt.Errorf("Session id cannot be empty")
 	}
 
-	result := TokenData{}
-	found, err := tokenCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &result)
-	if (err != nil) {
+	// Query Mongo
+	queryTokenData := TokenData{}
+	found, err := tokenCache.MongoCache.FindDataForSessionId(MONGO_TOKEN_CACHE_ID_COLUMN, sessionId, &queryTokenData)
+	if (err != nil || found == nil) {
 		return nil, err
 	}
-	if (found == nil) {
-		return nil, nil
-	}
 
-	result, ok := found.(TokenData)
+	// Safely cast to TokenData
+	result, ok := found.(*TokenData)
 	if (ok) {
-		return &result, nil
+		return result, nil
 	}
 	return nil, nil
 }

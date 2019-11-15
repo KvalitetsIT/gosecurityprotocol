@@ -7,7 +7,7 @@ import (
 	uuid "github.com/google/uuid"
 )
 
-func IgnoreTestMongoTokenCache(t *testing.T) {
+func TestMongoTokenCache(t *testing.T) {
 
 	// Given
 	mongoTokenCache, createErr := NewMongoTokenCache("mongo", "testdb", "testcoll")
@@ -37,7 +37,34 @@ func IgnoreTestMongoTokenCache(t *testing.T) {
         assert.Equal(t, testHash, tokenDataGet.Hash)
 }
 
-func TestFindNonExistingReturnsNil (t *testing.T) {
+
+func TestMongoTokenCacheSaveAndGet(t *testing.T) {
+
+        // Given
+        mongoTokenCache, _ := NewMongoTokenCache("mongo", "testdb", "testcoll")
+        sessionId := fmt.Sprintf("sessionid-%s", uuid.New().String())
+        firstToken:= "first-token"
+        firstHash  := fmt.Sprintf("hash-xyz-%s", uuid.New().String())
+
+        // When
+        tokenDataFirst, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, firstToken, 2000, firstHash)
+        tokenDataGet, getErr := mongoTokenCache.FindTokenDataForSessionId(sessionId)
+
+        // Then
+        assert.NilError(t, saveErr)
+        assert.NilError(t, getErr)
+
+        assert.Equal(t, sessionId, tokenDataFirst.Sessionid)
+        assert.Equal(t, firstToken, tokenDataFirst.Authenticationtoken)
+        assert.Equal(t, firstHash, tokenDataFirst.Hash)
+
+        assert.Equal(t, sessionId, tokenDataGet.Sessionid)
+        assert.Equal(t, firstToken, tokenDataGet.Authenticationtoken)
+        assert.Equal(t, firstHash, tokenDataGet.Hash)
+}
+
+
+func IgnoreTestFindNonExistingReturnsNil (t *testing.T) {
 
         // Given
         mongoTokenCache, _ := NewMongoTokenCache("mongo", "testdb", "testcoll")

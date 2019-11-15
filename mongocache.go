@@ -65,21 +65,22 @@ func (mongoCache *MongoCache) FindDataForSessionId(sessionKey string, sessionId 
 	if (sessionId == "") {
 		return nil, nil
 	}
+
 	query := mongoCache.collection.Find(bson.M{sessionKey: sessionId})
 	count, err := query.Count()
 	if (err != nil) {
 		return nil, err
 	}
+
 	if (count == 1) {
 		err = query.One(object)
-	} else {
-		return nil, nil
+		if (err != nil) {
+                	mongoCache.ReConnect()
+                	return nil, err
+        	}
+		return object, nil
 	}
-	if (err != nil) {
-		mongoCache.ReConnect()
-		return nil, err
-	}
-	return object, nil
+	return nil, nil
 }
 
 func (mongoCache *MongoCache) Delete(object interface{}) error {
