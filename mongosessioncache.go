@@ -2,13 +2,14 @@ package securityprotocol
 
 import "fmt"
 
+
 type MongoSessionCache struct {
 
 	MongoCache	*MongoCache
 }
 
 func NewMongoSessionCache(mongodb string, mongodb_database string, mongodb_collection string) (*MongoSessionCache, error) {
-	mongoCache, err := NewMongoCache(mongodb, mongodb_database, mongodb_collection, "token")
+	mongoCache, err := NewMongoCache(mongodb, mongodb_database, mongodb_collection, SESSIONID_COLUMN)
 	if (err != nil) {
 		return nil, err
 	}
@@ -22,7 +23,7 @@ func (sessionCache *MongoSessionCache) FindSessionDataForSessionId(sessionId str
 
 	// Query Mongo
 	querySessionData := SessionData{}
-	found, err := sessionCache.MongoCache.FindDataForSessionId("sessionid", sessionId, &querySessionData)
+	found, err := sessionCache.MongoCache.FindDataForSessionId(SESSIONID_COLUMN, sessionId, &querySessionData)
 	if (err != nil || found == nil) {
 		return nil, err
 	}

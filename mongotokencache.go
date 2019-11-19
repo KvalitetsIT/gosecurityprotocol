@@ -2,14 +2,13 @@ package securityprotocol
 
 import "fmt"
 
-const MONGO_TOKEN_CACHE_ID_COLUMN = "sessionid"
 
 type MongoTokenCache struct {
 	MongoCache	*MongoCache
 }
 
 func NewMongoTokenCache(mongodb string, mongodb_database string, mongodb_collection string) (*MongoTokenCache, error) {
-	mongoCache, err := NewMongoCache(mongodb, mongodb_database, mongodb_collection, MONGO_TOKEN_CACHE_ID_COLUMN)
+	mongoCache, err := NewMongoCache(mongodb, mongodb_database, mongodb_collection, SESSIONID_COLUMN)
 	if (err != nil) {
 		return nil, err
 	}
@@ -23,7 +22,7 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 
 	// Query Mongo
 	queryTokenData := TokenData{}
-	found, err := tokenCache.MongoCache.FindDataForSessionId(MONGO_TOKEN_CACHE_ID_COLUMN, sessionId, &queryTokenData)
+	found, err := tokenCache.MongoCache.FindDataForSessionId(SESSIONID_COLUMN, sessionId, &queryTokenData)
 	if (err != nil || found == nil) {
 		return nil, err
 	}
