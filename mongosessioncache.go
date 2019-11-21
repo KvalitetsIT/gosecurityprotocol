@@ -24,8 +24,11 @@ func (sessionCache *MongoSessionCache) FindSessionDataForSessionId(sessionId str
 	// Query Mongo
 	querySessionData := SessionData{}
 	found, err := sessionCache.MongoCache.FindDataForSessionId(SESSIONID_COLUMN, sessionId, &querySessionData)
-	if (err != nil || found == nil) {
+	if (err != nil) {
 		return nil, err
+	}
+	if (found == nil) {
+		return nil, nil
 	}
 
 	// Safely cast to SessionData
@@ -43,7 +46,6 @@ func (sessionCache *MongoSessionCache) SaveSessionData(sessionData *SessionData)
 		if (existing != nil) {
 			sessionCache.MongoCache.Delete(existing)
 		}
-
 		err := sessionCache.MongoCache.Save(sessionData)
 		return err
 	}

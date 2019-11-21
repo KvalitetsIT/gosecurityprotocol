@@ -7,11 +7,19 @@ import (
 	"io"
 	"encoding/base64"
 	uuid "github.com/google/uuid"
+
+
+	"gopkg.in/mgo.v2/bson"
+
 )
 
 type SessionData struct {
 
-	TokenData
+        ID                      bson.ObjectId `bson:"_id,omitempty"`
+        Sessionid               string `bson:"sessionid"`
+        Authenticationtoken     string
+        Timestamp               time.Time `bson:"timestamp"`
+        Hash                    string
 
 	UserAttributes    map[string][]string
 	SessionAttributes map[string]string
@@ -36,7 +44,7 @@ type SessionCache interface {
 
 func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time, clientCertHash string) (*SessionData, error) {
 
-        sessionData := SessionData { TokenData: TokenData { Sessionid: id, Authenticationtoken: token, Timestamp: expiry}, UserAttributes: userAttributes, SessionAttributes: make(map[string]string) }
+        sessionData := SessionData { Sessionid: id, Authenticationtoken: token, Timestamp: expiry, UserAttributes: userAttributes, SessionAttributes: make(map[string]string) }
         sessionData.Hash = sessionData.CalculateHash()
 	sessionData.ClientCertHash = clientCertHash
 
@@ -57,7 +65,9 @@ func (data *SessionData) AddSessionAttribute(key string, value string) {
 
 func (data *SessionData) CalculateHash() string {
 
-	s := data.TokenData.CalculateHash()
+        s := data.Sessionid
+        s = s + data.Authenticationtoken
+        s = s + data.Timestamp.Format(time.UnixDate)
 
 	userAttributeKeys := []string{}
 	for k, _ := range data.UserAttributes {
@@ -93,4 +103,3 @@ type NilSessionDataFetcher struct {
 func (fetcher NilSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
 	return nil, nil
 }
-

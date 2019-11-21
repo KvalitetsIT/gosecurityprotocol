@@ -49,6 +49,6 @@ func TestSamlSessionDataCreatorWithSamlAssertionSucceedsAndReturnsFullyInitializ
         assert.Equal(t, len(samlSessionData.UserAttributes["uid"]), 1)
         assert.Equal(t, samlSessionData.UserAttributes["uid"][0], "test")
 
-	assert.Equal(t, samlSessionData.Hash, "oBrPnHAGsPEIf08ph70jtw==")
+	assert.Equal(t, samlSessionData.Hash, "/6dUhUz4nogqUhLu1KDjNg==")
 }
 

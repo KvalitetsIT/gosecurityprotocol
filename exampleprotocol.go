@@ -14,7 +14,7 @@ type ExampleSessionDataFetcher struct {
 
 func (fetcher ExampleSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
 
-	sessionData := SessionData{ TokenData: TokenData { Sessionid: sessionId, Hash: sessionId } }
+	sessionData := SessionData{ Sessionid: sessionId, Hash: sessionId  }
 
 	return &sessionData, nil
 }
