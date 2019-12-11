@@ -101,7 +101,7 @@ func TestSessionDataHandlerSetSessionAttributeOldInterface(t *testing.T) {
 	assert.Equal(t, gotSessionData.SessionAttributes[sessionKey], sessionValue)
 //	jsonSessionData, _ := gotSessionData.ToString()
 //	assert.Equal(t, jsonSessionData, "kuk")
- 	assert.Equal(t, gotSessionData.Hash, "dNVCwG36HBY+n2vCoAw1+g==")
+ 	assert.Equal(t, gotSessionData.Hash, "tRxBrXZTgA6H03RC3Sfi5g==")
 }
 
 func readStringFromResponseBody(resp *http.Response) string {
