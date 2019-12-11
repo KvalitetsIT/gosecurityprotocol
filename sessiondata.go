@@ -8,9 +8,8 @@ import (
 	"encoding/base64"
 	uuid "github.com/google/uuid"
 
-
+	"encoding/json"
 	"gopkg.in/mgo.v2/bson"
-
 )
 
 type SessionData struct {
@@ -40,8 +39,6 @@ type SessionCache interface {
         FindSessionDataForSessionId(sessionId string) (*SessionData, error)
 }
 
-
-
 func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time, clientCertHash string) (*SessionData, error) {
 
         sessionData := SessionData { Sessionid: id, Authenticationtoken: token, Timestamp: expiry, UserAttributes: userAttributes, SessionAttributes: make(map[string]string) }
@@ -59,6 +56,9 @@ func CreateSessionData(token string, userAttributes map[string][]string, expiry 
 
 func (data *SessionData) AddSessionAttribute(key string, value string) {
 
+	if (data.SessionAttributes == nil) {
+		data.SessionAttributes = make(map[string]string)
+	}
 	data.SessionAttributes[key] = value
 	data.Hash = data.CalculateHash()
 }
@@ -95,6 +95,14 @@ func (data *SessionData) CalculateHash() string {
 	hash := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
 	return hash
+}
+
+func (data *SessionData) ToString() (string, error) {
+	sessionDataBytes, marshalErr := json.Marshal(data)
+	if (marshalErr != nil) {
+		return "", marshalErr
+	}
+	return string(sessionDataBytes), nil
 }
 
 type NilSessionDataFetcher struct {
