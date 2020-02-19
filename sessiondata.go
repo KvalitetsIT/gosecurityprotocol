@@ -1,24 +1,23 @@
 package securityprotocol
 
 import (
-	"time"
-	"sort"
 	"crypto/md5"
-	"io"
 	"encoding/base64"
 	uuid "github.com/google/uuid"
+	"io"
+	"sort"
+	"time"
 
 	"encoding/json"
 	"gopkg.in/mgo.v2/bson"
 )
 
 type SessionData struct {
-
-        ID                      bson.ObjectId `bson:"_id,omitempty"`
-        Sessionid               string `bson:"sessionid"`
-        Authenticationtoken     string
-        Timestamp               time.Time `bson:"timestamp"`
-        Hash                    string
+	ID                  bson.ObjectId `bson:"_id,omitempty"`
+	Sessionid           string        `bson:"sessionid"`
+	Authenticationtoken string
+	Timestamp           time.Time `bson:"timestamp"`
+	Hash                string
 
 	UserAttributes    map[string][]string
 	SessionAttributes map[string]string
@@ -35,17 +34,18 @@ type SessionDataCreator interface {
 }
 
 type SessionCache interface {
-        SaveSessionData(*SessionData) error
-        FindSessionDataForSessionId(sessionId string) (*SessionData, error)
+	SaveSessionData(*SessionData) error
+	FindSessionDataForSessionId(sessionId string) (*SessionData, error)
+	DeleteSessionData(sessionId string) error
 }
 
 func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time, clientCertHash string) (*SessionData, error) {
 
-        sessionData := SessionData { Sessionid: id, Authenticationtoken: token, Timestamp: expiry, UserAttributes: userAttributes, SessionAttributes: make(map[string]string) }
-        sessionData.Hash = sessionData.CalculateHash()
+	sessionData := SessionData{Sessionid: id, Authenticationtoken: token, Timestamp: expiry, UserAttributes: userAttributes, SessionAttributes: make(map[string]string)}
+	sessionData.Hash = sessionData.CalculateHash()
 	sessionData.ClientCertHash = clientCertHash
 
-        return &sessionData, nil
+	return &sessionData, nil
 }
 
 func CreateSessionData(token string, userAttributes map[string][]string, expiry time.Time, clientCertHash string) (*SessionData, error) {
@@ -56,7 +56,7 @@ func CreateSessionData(token string, userAttributes map[string][]string, expiry 
 
 func (data *SessionData) AddSessionAttribute(key string, value string) {
 
-	if (data.SessionAttributes == nil) {
+	if data.SessionAttributes == nil {
 		data.SessionAttributes = make(map[string]string)
 	}
 	data.SessionAttributes[key] = value
@@ -65,9 +65,9 @@ func (data *SessionData) AddSessionAttribute(key string, value string) {
 
 func (data *SessionData) CalculateHash() string {
 
-        s := data.Sessionid
-        s = s + data.Authenticationtoken
-        s = s + data.Timestamp.Format(time.UnixDate)
+	s := data.Sessionid
+	s = s + data.Authenticationtoken
+	s = s + data.Timestamp.Format(time.UnixDate)
 
 	userAttributeKeys := []string{}
 	for k, _ := range data.UserAttributes {
@@ -99,7 +99,7 @@ func (data *SessionData) CalculateHash() string {
 
 func (data *SessionData) ToString() (string, error) {
 	sessionDataBytes, marshalErr := json.Marshal(data)
-	if (marshalErr != nil) {
+	if marshalErr != nil {
 		return "", marshalErr
 	}
 	return string(sessionDataBytes), nil
@@ -108,6 +108,6 @@ func (data *SessionData) ToString() (string, error) {
 type NilSessionDataFetcher struct {
 }
 
-func (fetcher NilSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler)  (*SessionData, error) {
+func (fetcher NilSessionDataFetcher) GetSessionData(sessionId string, sessionIdHandler SessionIdHandler) (*SessionData, error) {
 	return nil, nil
 }

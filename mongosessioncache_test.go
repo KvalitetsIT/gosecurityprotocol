@@ -1,9 +1,9 @@
 package securityprotocol
 
 import (
-        "testing"
-        "gotest.tools/assert"
 	uuid "github.com/google/uuid"
+	"gotest.tools/assert"
+	"testing"
 )
 
 func TestMongoSessionCache(t *testing.T) {
@@ -15,13 +15,15 @@ func TestMongoSessionCache(t *testing.T) {
 	hash1 := "hash1"
 	hash2 := "hash2"
 
-	sessionDataFirst := SessionData{ Sessionid: sessionId, Hash: hash1 }
-	sessionDataSecond := SessionData{ Sessionid: sessionId, Hash: hash2 }
+	sessionDataFirst := SessionData{Sessionid: sessionId, Hash: hash1}
+	sessionDataSecond := SessionData{Sessionid: sessionId, Hash: hash2}
 
-        // When
-        saveFirstErr := mongoSessionCache.SaveSessionData(&sessionDataFirst)
+	// When
+	saveFirstErr := mongoSessionCache.SaveSessionData(&sessionDataFirst)
 	saveSecondErr := mongoSessionCache.SaveSessionData(&sessionDataSecond)
 	sessionDataGet, getErr := mongoSessionCache.FindSessionDataForSessionId(sessionId)
+	mongoSessionCache.DeleteSessionData(sessionId)
+	sessionDataGetDeleted, _ := mongoSessionCache.FindSessionDataForSessionId(sessionId)
 
 	// Then
 	assert.NilError(t, createErr)
@@ -29,9 +31,11 @@ func TestMongoSessionCache(t *testing.T) {
 	assert.NilError(t, saveSecondErr)
 	assert.NilError(t, getErr)
 
-        assert.Equal(t, sessionId, sessionDataGet.Sessionid)
+	assert.Equal(t, sessionId, sessionDataGet.Sessionid)
 	assert.Equal(t, hash2, sessionDataGet.Hash)
+	assert.Assert(t, sessionDataGetDeleted == nil)
 }
+
 /* TODO
 
 func TestMongoSessionCacheSaveAndGet(t *testing.T) {
