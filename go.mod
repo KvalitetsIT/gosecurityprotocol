@@ -1,4 +1,4 @@
-module oioidwsrest
+module github.com/KvalitetsIT/gosecurityprotocol
 
 go 1.13
 
