@@ -1,0 +1,88 @@
+<Assertion xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0" ID="ID_c2ab4438-7fcd-4723-b5c2-82066891d785"
+           IssueInstant="2020-03-05T08:12:49.613Z">
+    <Issuer >
+        https://telemed-medarbejderlogin-test.rm.dk/auth/realms/broker
+    </Issuer>
+    <Subject >
+        <NameID >testbruger1</NameID>
+        <SubjectConfirmation 
+                             Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+            <SubjectConfirmationData 
+                                     NotOnOrAfter="2020-03-05T16:12:47.613Z"
+                                     Recipient="https://telemed-test.rm.dk/samltest/saml/SSO"
+                                     InResponseTo="_785f480b-2e54-4134-a7ad-118cb7756e6d"></SubjectConfirmationData>
+        </SubjectConfirmation>
+    </Subject>
+    <Conditions  NotBefore="2020-03-05T08:12:47.613Z"
+                NotOnOrAfter="2020-03-05T08:13:47.613Z">
+        <AudienceRestriction >
+            <Audience >testsamlgo</Audience>
+        </AudienceRestriction>
+    </Conditions>
+    <AttributeStatement >
+        <Attribute  FriendlyName="autorisationsids" Name="autorisationsids"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">MDT13</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="" Name="FullName"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">Ford Prefect</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="bSKDepartmentName"
+                   Name="bSKDepartmentName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">Aarhus</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="SORID" Name="urn:oid:2.5.4.11"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">391201000016000</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="RegionsID" Name="RegionsID"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">Aarhus</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="FirstName" Name="FirstName"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">Ford</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="bSKAutorisationsInformation"
+                   Name="bSKAutorisationsInformation" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">&lt;opslag dato=&#34;2017-02-07
+                02:01:46&#34;&gt;&#x9;&lt;autorisation id=&#34;1&#34;&gt;&#x9;&#x9;&lt;autorisationsid&gt;MDT13&lt;/autorisationsid&gt;&#x9;&#x9;&lt;faggruppe&gt;7170&lt;/faggruppe&gt;&#x9;&#x9;&lt;faggruppetekst&gt;Læge&lt;/faggruppetekst&gt;&#x9;&lt;/autorisation&gt;&#x9;&lt;/opslag&gt;
+            </AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="SurName" Name="SurName"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">Prefect</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="" Name="Role"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">manage-account</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="" Name="Role"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">manage-account-links
+            </AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="" Name="Role"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">uma_authorization</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="" Name="Role"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">view-profile</AttributeValue>
+        </Attribute>
+        <Attribute  FriendlyName="" Name="Role"
+                   NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic">
+            <AttributeValue  xsi:type="">offline_access</AttributeValue>
+        </Attribute>
+    </AttributeStatement>
+    <AuthnStatement 
+                    SessionIndex="a0bb83bf-85cb-45ea-9f4a-0b8ef34cb23e::9db5d2e7-13c5-4d4f-8b49-079649ca20bd"
+                    AuthnInstant="2020-03-05T08:12:49.613Z">
+        <AuthnContext >
+            <AuthnContextClassRef >
+                urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified
+            </AuthnContextClassRef>
+        </AuthnContext>
+    </AuthnStatement>
+</Assertion>

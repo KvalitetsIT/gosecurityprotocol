@@ -3,13 +3,12 @@ package securityprotocol
 import (
 	"crypto/md5"
 	"encoding/base64"
+	"encoding/json"
 	uuid "github.com/google/uuid"
+	"gopkg.in/mgo.v2/bson"
 	"io"
 	"sort"
 	"time"
-
-	"encoding/json"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type SessionData struct {
@@ -40,8 +39,8 @@ type SessionCache interface {
 }
 
 func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time, clientCertHash string) (*SessionData, error) {
-
-	sessionData := SessionData{Sessionid: id, Authenticationtoken: token, Timestamp: expiry, UserAttributes: userAttributes, SessionAttributes: make(map[string]string)}
+	encodedToken := base64.StdEncoding.EncodeToString([]byte(token))
+	sessionData := SessionData{Sessionid: id, Authenticationtoken: encodedToken, Timestamp: expiry, UserAttributes: userAttributes, SessionAttributes: make(map[string]string)}
 	sessionData.Hash = sessionData.CalculateHash()
 	sessionData.ClientCertHash = clientCertHash
 
