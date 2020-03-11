@@ -36,22 +36,26 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 }
 
 func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
-	if (sessionId != "") {
-		existing, findErr := tokenCache.FindTokenDataForSessionId(sessionId)
-		if (findErr != nil) {
-			return nil, findErr
-		}
-		if (existing != nil) {
-			tokenCache.MongoCache.Delete(existing)
-		}
+        expiryTime := GetExpiryDate(expires_in)
+	return tokenCache.SaveAuthenticationKeysForSessionId(sessionId, authenticationToken, expiryTime, hash)
+}
 
-               	expiryTime := GetExpiryDate(expires_in)
-		tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
-		err := tokenCache.MongoCache.Save(tokenData)
-		if (err != nil) {
-			return nil, err
-		}
-		return tokenData, nil
-	}
-	return nil, fmt.Errorf("sessionId cannot be empty")
+func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(sessionId string, authenticationToken string, expiresTime time.Time, hash string) (*TokenData, error) {
+        if (sessionId != "") {
+                existing, findErr := tokenCache.FindTokenDataForSessionId(sessionId)
+                if (findErr != nil) {
+                        return nil, findErr
+                }
+                if (existing != nil) {
+                        tokenCache.MongoCache.Delete(existing)
+                }
+
+                tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
+                err := tokenCache.MongoCache.Save(tokenData)
+                if (err != nil) {
+                        return nil, err
+                }
+                return tokenData, nil
+        }
+        return nil, fmt.Errorf("sessionId cannot be empty")
 }
