@@ -41,7 +41,7 @@ func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId 
 	return tokenCache.SaveAuthenticationKeysForSessionIdWithExpiry(sessionId, authenticationToken, expiryTime, hash)
 }
 
-func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(sessionId string, authenticationToken string, expiresTime time.Time, hash string) (*TokenData, error) {
+func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(sessionId string, authenticationToken string, expiryTime time.Time, hash string) (*TokenData, error) {
         if (sessionId != "") {
                 existing, findErr := tokenCache.FindTokenDataForSessionId(sessionId)
                 if (findErr != nil) {
