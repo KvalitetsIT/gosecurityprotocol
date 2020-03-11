@@ -1,6 +1,7 @@
 package securityprotocol
 
 import "fmt"
+import "time"
 
 
 type MongoTokenCache struct {
@@ -37,7 +38,7 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 
 func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
         expiryTime := GetExpiryDate(expires_in)
-	return tokenCache.SaveAuthenticationKeysForSessionId(sessionId, authenticationToken, expiryTime, hash)
+	return tokenCache.SaveAuthenticationKeysForSessionIdWithExpiry(sessionId, authenticationToken, expiryTime, hash)
 }
 
 func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(sessionId string, authenticationToken string, expiresTime time.Time, hash string) (*TokenData, error) {
