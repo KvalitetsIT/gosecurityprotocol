@@ -5,7 +5,10 @@ ENV GO111MODULE=on
 RUN mkdir /securityprotocol
 WORKDIR /securityprotocol
 
-COPY . /securityprotocol/
+COPY go.mod go.mod
+# Download dependencies
 RUN go mod download
+
+COPY . /securityprotocol/
 RUN go test ./...
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/securityprotocol .
