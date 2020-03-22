@@ -107,7 +107,7 @@ func (mongoCache *MongoCache) Close() {
 
 func GetExpiryDate(expiresIn int64) time.Time {
 
-        expiryTime := time.Now().Add(time.Duration(expiresIn) * time.Millisecond)
+        expiryTime := time.Now().Add(time.Duration(expiresIn) * time.Second)
         return expiryTime
 }
 
