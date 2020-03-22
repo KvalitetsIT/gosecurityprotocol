@@ -20,10 +20,14 @@ func (tokenCache *MockTokenCache) FindTokenDataForSessionId(sessionId string) (*
 func (tokenCache *MockTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
 
 	expiryTime := time.Now() //GetExpiryDate(expires_in)
-	tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
-	return tokenData, nil
+	return tokenCache.SaveAuthenticationKeysForSessionIdWithExpiry(sessionId, authenticationToken, expiryTime, hash)
 }
 
+
+func (tokenCache *MockTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(sessionId string, authenticationToken string, expiryTime time.Time, hash string) (*TokenData, error) {
+	tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
+        return tokenData, nil
+}
 
 type MockService struct {
 
