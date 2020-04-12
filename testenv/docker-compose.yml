@@ -4,6 +4,6 @@ networks:
     driver: bridge
 services:
    mongo:
-     image: mongo:3.3
+     image: mongo:3.7
      networks:
        - gosecurityprotocol

@@ -13,6 +13,7 @@ type TokenCache interface {
 	SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error)
 	SaveAuthenticationKeysForSessionIdWithExpiry(sessionId string, authenticationToken string, expiryTime time.Time, hash string) (*TokenData, error)
 	FindTokenDataForSessionId(sessionId string) (*TokenData, error)
+	DeleteTokenDataWithId(id bson.ObjectId) error
 }
 
 

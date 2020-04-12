@@ -44,7 +44,10 @@ func (sessionCache *MongoSessionCache) SaveSessionData(sessionData *SessionData)
 		if existing != nil {
 			sessionCache.MongoCache.Delete(existing)
 		}
-		err := sessionCache.MongoCache.Save(sessionData)
+		createdId, err := sessionCache.MongoCache.Save(sessionData)
+		if (err != nil && createdId != nil) {
+			sessionData.ID = *createdId
+		}
 		return err
 	}
 	return fmt.Errorf("sessionId cannot be empty")

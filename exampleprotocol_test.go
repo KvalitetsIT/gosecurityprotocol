@@ -6,11 +6,18 @@ import (
 	"fmt"
 	"time"
         "gotest.tools/assert"
+	"gopkg.in/mgo.v2/bson"
+
 )
 
 type MockTokenCache struct {
 
 }
+
+func (tokenCache *MockTokenCache) DeleteTokenDataWithId(id bson.ObjectId) error {
+	return nil
+}
+
 
 func (tokenCache *MockTokenCache) FindTokenDataForSessionId(sessionId string) (*TokenData, error) {
         result := TokenData{ Sessionid: sessionId, Hash: "hash" }

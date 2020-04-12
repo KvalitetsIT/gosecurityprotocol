@@ -83,6 +83,17 @@ func (mongoCache *MongoCache) FindDataForSessionId(sessionKey string, sessionId 
 	return nil, nil
 }
 
+func (mongoCache *MongoCache) DeleteWithId(id bson.ObjectId) error {
+
+	err := mongoCache.collection.Remove(bson.M{"_id": id})
+        if (err != nil) {
+                mongoCache.ReConnect()
+                return err
+        }
+        return nil
+}
+
+
 func (mongoCache *MongoCache) Delete(object interface{}) error {
         err := mongoCache.collection.Remove(object)
         if (err != nil) {
@@ -92,13 +103,16 @@ func (mongoCache *MongoCache) Delete(object interface{}) error {
         return nil
 }
 
-func (mongoCache *MongoCache) Save(object interface{}) error {
-	err := mongoCache.collection.Insert(object)
+func (mongoCache *MongoCache) Save(object interface{}) (*bson.ObjectId, error) {
+	newId := bson.NewObjectId()
+	info, err := mongoCache.collection.Upsert(bson.M{"_id": newId}, object)
 	if (err != nil) {
 		mongoCache.ReConnect()
-		return err
+		return nil, err
 	}
-	return nil
+	newId = info.UpsertedId.(bson.ObjectId)
+	return &newId, nil
+	return nil, nil
 }
 
 func (mongoCache *MongoCache) Close() {

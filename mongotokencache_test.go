@@ -63,6 +63,35 @@ func TestMongoTokenCacheSaveAndGet(t *testing.T) {
         assert.Equal(t, firstHash, tokenDataGet.Hash)
 }
 
+func TestMongoTokenCacheSaveAndDelete(t *testing.T) {
+	fmt.Println("DUM TEST")
+
+        // Given
+        mongoTokenCache, _ := NewMongoTokenCache("mongo", "testdb", "testcoll")
+        sessionId := fmt.Sprintf("sessionid-%s123", uuid.New().String())
+        firstToken:= "first-token"
+        firstHash  := fmt.Sprintf("hash-xyz-%s", uuid.New().String())
+
+        // When
+        tokenDataFirst, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, firstToken, 2000, firstHash)
+
+	deleteErr := mongoTokenCache.DeleteTokenDataWithId(tokenDataFirst.ID)
+
+        tokenDataGetAfterDelete, getErr := mongoTokenCache.FindTokenDataForSessionId(sessionId)
+
+        // Then
+        assert.NilError(t, saveErr)
+	assert.NilError(t, deleteErr)
+        assert.NilError(t, getErr)
+
+        assert.Equal(t, sessionId, tokenDataFirst.Sessionid)
+        assert.Equal(t, firstToken, tokenDataFirst.Authenticationtoken)
+        assert.Equal(t, firstHash, tokenDataFirst.Hash)
+
+        assert.Assert(t, tokenDataGetAfterDelete == nil)
+}
+
+
 
 func IgnoreTestFindNonExistingReturnsNil (t *testing.T) {
 

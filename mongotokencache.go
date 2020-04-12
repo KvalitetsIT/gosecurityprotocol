@@ -2,7 +2,7 @@ package securityprotocol
 
 import "fmt"
 import "time"
-
+import "gopkg.in/mgo.v2/bson"
 
 type MongoTokenCache struct {
 	MongoCache	*MongoCache
@@ -36,6 +36,11 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 	return nil, nil
 }
 
+func (tokenCache *MongoTokenCache) DeleteTokenDataWithId(id bson.ObjectId) error {
+	err := tokenCache.MongoCache.DeleteWithId(id)
+	return err
+}
+
 func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
         expiryTime := GetExpiryDate(expires_in)
 	return tokenCache.SaveAuthenticationKeysForSessionIdWithExpiry(sessionId, authenticationToken, expiryTime, hash)
@@ -52,10 +57,13 @@ func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(
                 }
 
                 tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
-                err := tokenCache.MongoCache.Save(tokenData)
+                resultId, err := tokenCache.MongoCache.Save(tokenData)
                 if (err != nil) {
                         return nil, err
                 }
+		if (resultId != nil) {
+			tokenData.ID = *resultId
+		}
                 return tokenData, nil
         }
         return nil, fmt.Errorf("sessionId cannot be empty")
