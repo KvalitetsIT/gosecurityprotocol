@@ -14,6 +14,12 @@ func NewMongoSessionCache(mongodb string, mongodb_database string, mongodb_colle
 	return &MongoSessionCache{MongoCache: mongoCache}, nil
 }
 
+func (sessionCache *MongoSessionCache) MaintainCache() error {
+
+	_, err := sessionCache.MongoCache.EnsureIndexes()
+	return err
+}
+
 func (sessionCache *MongoSessionCache) FindSessionDataForSessionId(sessionId string) (*SessionData, error) {
 	if sessionId == "" {
 		return nil, fmt.Errorf("Session id cannot be empty")

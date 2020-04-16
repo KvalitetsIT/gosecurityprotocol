@@ -16,6 +16,13 @@ func NewMongoTokenCache(mongodb string, mongodb_database string, mongodb_collect
 	return &MongoTokenCache{ MongoCache: mongoCache }, nil
 }
 
+func (tokenCache *MongoTokenCache) MaintainCache() error {
+
+        _, err := tokenCache.MongoCache.EnsureIndexes()
+        return err
+}
+
+
 func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (*TokenData, error) {
 	if (sessionId == "") {
 		return nil, fmt.Errorf("Session id cannot be empty")

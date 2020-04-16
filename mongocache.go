@@ -82,7 +82,7 @@ func newCache(mongodb string, dbName string, collectionName string, keyColumn st
 	return &mongoCache, nil
 }
 
-func (mongoCache *MongoCache) EnsureIndexes() error {
+func (mongoCache *MongoCache) EnsureIndexes() ([]string, error) {
 
 	ttlName := "idx_session_ttl"
 	ukName := "idx_session_uk"
@@ -99,7 +99,7 @@ func (mongoCache *MongoCache) EnsureIndexes() error {
         }
         _, err := mongoCache.getCollection().Indexes().CreateOne(ctx, uniqueKeyIndexModel)
         if (err != nil) {
-                return err
+                return nil, err
         }
 
         var expiryAfterSeconds int32
@@ -114,8 +114,7 @@ func (mongoCache *MongoCache) EnsureIndexes() error {
         }
 
 	opts := options.CreateIndexes().SetMaxTime(2 * time.Second)
-	_, err = mongoCache.getCollection().Indexes().CreateMany(ctx, []mongo.IndexModel{ uniqueKeyIndexModel, ttlIndexModel }, opts)
-	return err
+	return mongoCache.getCollection().Indexes().CreateMany(ctx, []mongo.IndexModel{ uniqueKeyIndexModel, ttlIndexModel }, opts)
 }
 
 func (mongoCache *MongoCache) FindDataForSessionId(sessionKey string, sessionId string, result interface{}) (bool, error) {

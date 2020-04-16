@@ -28,17 +28,21 @@ func TestMongoSessionCache(t *testing.T) {
 	assert.NilError(t, saveSecondErr)
 	assert.Assert(t, sessionDataSecond.GetID() != nil)
 
+	assert.Equal(t, sessionDataFirst.GetID().Hex(), sessionDataSecond.GetID().Hex())
+
 	sessionDataGet, getErr := mongoSessionCache.FindSessionDataForSessionId(sessionId)
 	assert.NilError(t, getErr)
 	assert.Assert(t, sessionDataGet != nil)
+	assert.Equal(t, sessionDataFirst.GetID().Hex(), sessionDataGet.GetID().Hex())
 
 	mongoSessionCache.DeleteSessionData(sessionId)
-	sessionDataGetDeleted, _ := mongoSessionCache.FindSessionDataForSessionId(sessionId)
+	sessionDataGetDeleted, err := mongoSessionCache.FindSessionDataForSessionId(sessionId)
+	assert.NilError(t, err)
+	assert.Assert(t, sessionDataGetDeleted == nil)
 
 	// Then
 	assert.Equal(t, sessionId, sessionDataGet.Sessionid)
 	assert.Equal(t, hash2, sessionDataGet.Hash)
-	assert.Assert(t, sessionDataGetDeleted == nil)
 }
 
 /* TODO
