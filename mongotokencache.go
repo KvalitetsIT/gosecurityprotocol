@@ -58,3 +58,6 @@ func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(
         }
         return nil, fmt.Errorf("sessionId cannot be empty")
 }
+
+var _ Maintainable = (*MongoTokenCache)(nil)
+

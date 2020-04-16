@@ -43,7 +43,6 @@ type SessionCache interface {
 	SaveSessionData(*SessionData) error
 	FindSessionDataForSessionId(sessionId string) (*SessionData, error)
 	DeleteSessionData(sessionId string) error
-	MaintainCache() error
 }
 
 func CreateSessionDataWithId(id string, token string, userAttributes map[string][]string, expiry time.Time, clientCertHash string) (*SessionData, error) {

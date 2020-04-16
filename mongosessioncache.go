@@ -64,3 +64,7 @@ func (sessionCache *MongoSessionCache) DeleteSessionData(sessionId string) error
 	}
 	return nil
 }
+
+var _ SessionCache = (*MongoSessionCache)(nil)
+var _ Maintainable = (*MongoSessionCache)(nil)
+

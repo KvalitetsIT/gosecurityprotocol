@@ -11,9 +11,9 @@ func TestMongoCache(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Assert(t, mongoCache != nil)
 
+	mongoCache.EnsureIndexes()
 	createdIndexNames, err := mongoCache.EnsureIndexes()
 	assert.NilError(t, err)
         assert.Assert(t, createdIndexNames != nil)
-	assert.Equal(t, 0, len(createdIndexNames))
-
+	assert.Equal(t, 2, len(createdIndexNames))
 }
