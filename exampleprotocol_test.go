@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"time"
         "gotest.tools/assert"
-	"gopkg.in/mgo.v2/bson"
-
+	primitive "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MockTokenCache struct {
 
 }
 
-func (tokenCache *MockTokenCache) DeleteTokenDataWithId(id bson.ObjectId) error {
+func (tokenCache *MockTokenCache) DeleteTokenDataWithId(id primitive.ObjectID) error {
 	return nil
 }
 

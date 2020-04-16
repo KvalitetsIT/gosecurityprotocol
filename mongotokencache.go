@@ -2,7 +2,7 @@ package securityprotocol
 
 import "fmt"
 import "time"
-import "gopkg.in/mgo.v2/bson"
+import primitive "go.mongodb.org/mongo-driver/bson/primitive"
 
 type MongoTokenCache struct {
 	MongoCache	*MongoCache
@@ -24,19 +24,13 @@ func (tokenCache *MongoTokenCache) FindTokenDataForSessionId(sessionId string) (
 	// Query Mongo
 	queryTokenData := TokenData{}
 	found, err := tokenCache.MongoCache.FindDataForSessionId(SESSIONID_COLUMN, sessionId, &queryTokenData)
-	if (err != nil || found == nil) {
+	if (err != nil || !found) {
 		return nil, err
 	}
-
-	// Safely cast to TokenData
-	result, ok := found.(*TokenData)
-	if (ok) {
-		return result, nil
-	}
-	return nil, nil
+	return &queryTokenData, nil
 }
 
-func (tokenCache *MongoTokenCache) DeleteTokenDataWithId(id bson.ObjectId) error {
+func (tokenCache *MongoTokenCache) DeleteTokenDataWithId(id primitive.ObjectID) error {
 	err := tokenCache.MongoCache.DeleteWithId(id)
 	return err
 }
@@ -48,22 +42,11 @@ func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionId(sessionId 
 
 func (tokenCache *MongoTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(sessionId string, authenticationToken string, expiryTime time.Time, hash string) (*TokenData, error) {
         if (sessionId != "") {
-                existing, findErr := tokenCache.FindTokenDataForSessionId(sessionId)
-                if (findErr != nil) {
-                        return nil, findErr
-                }
-                if (existing != nil) {
-                        tokenCache.MongoCache.Delete(existing)
-                }
-
                 tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
-                resultId, err := tokenCache.MongoCache.Save(tokenData)
+                err := tokenCache.MongoCache.Save(tokenData, tokenData)
                 if (err != nil) {
                         return nil, err
                 }
-		if (resultId != nil) {
-			tokenData.ID = *resultId
-		}
                 return tokenData, nil
         }
         return nil, fmt.Errorf("sessionId cannot be empty")

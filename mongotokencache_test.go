@@ -11,6 +11,7 @@ func TestMongoTokenCache(t *testing.T) {
 
 	// Given
 	mongoTokenCache, createErr := NewMongoTokenCache("mongo", "testdb", "testcoll")
+	assert.NilError(t, createErr)
 	sessionId := fmt.Sprintf("sessionid-%s", uuid.New().String())
 	testToken := "test-token"
 	firstToken:= "first-token"
@@ -18,12 +19,13 @@ func TestMongoTokenCache(t *testing.T) {
 
         // When
         tokenDataFirst, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, firstToken, 2000, "first hash")
+	assert.NilError(t, saveErr)
 	tokenDataSaved, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, testToken, 1000, testHash)
+	assert.NilError(t, saveErr)
+	fmt.Println(fmt.Sprintf("leder efter: %s", sessionId))
 	tokenDataGet, getErr := mongoTokenCache.FindTokenDataForSessionId(sessionId)
 
 	// Then
-	assert.NilError(t, createErr)
-	assert.NilError(t, saveErr)
 	assert.NilError(t, getErr)
 
 	assert.Equal(t, firstToken, tokenDataFirst.Authenticationtoken)
@@ -75,7 +77,7 @@ func TestMongoTokenCacheSaveAndDelete(t *testing.T) {
         // When
         tokenDataFirst, saveErr := mongoTokenCache.SaveAuthenticationKeysForSessionId(sessionId, firstToken, 2000, firstHash)
 
-	deleteErr := mongoTokenCache.DeleteTokenDataWithId(tokenDataFirst.ID)
+	deleteErr := mongoTokenCache.DeleteTokenDataWithId(*tokenDataFirst.ID)
 
         tokenDataGetAfterDelete, getErr := mongoTokenCache.FindTokenDataForSessionId(sessionId)
 

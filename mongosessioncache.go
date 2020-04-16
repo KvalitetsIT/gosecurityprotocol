@@ -20,19 +20,13 @@ func (sessionCache *MongoSessionCache) FindSessionDataForSessionId(sessionId str
 	}
 
 	// Query Mongo
-	querySessionData := SessionData{}
-	found, err := sessionCache.MongoCache.FindDataForSessionId(SESSIONID_COLUMN, sessionId, &querySessionData)
-	if err != nil {
+	sessionData := SessionData{}
+	existing, err := sessionCache.MongoCache.FindDataForSessionId(SESSIONID_COLUMN, sessionId, &sessionData)
+	if (err != nil) {
 		return nil, err
 	}
-	if found == nil {
-		return nil, nil
-	}
-
-	// Safely cast to SessionData
-	result, ok := found.(*SessionData)
-	if ok {
-		return result, nil
+	if (existing) {
+		return &sessionData, nil
 	}
 	return nil, nil
 }
@@ -40,24 +34,26 @@ func (sessionCache *MongoSessionCache) FindSessionDataForSessionId(sessionId str
 func (sessionCache *MongoSessionCache) SaveSessionData(sessionData *SessionData) error {
 	sessionId := sessionData.Sessionid
 	if sessionId != "" {
-		existing, _ := sessionCache.FindSessionDataForSessionId(sessionId)
-		if existing != nil {
-			sessionCache.MongoCache.Delete(existing)
+		err := sessionCache.MongoCache.Save(sessionData, sessionData)
+		if (err != nil) {
+			return err
 		}
-		createdId, err := sessionCache.MongoCache.Save(sessionData)
-		if (err != nil && createdId != nil) {
-			sessionData.ID = *createdId
-		}
-		return err
+		return nil
 	}
 	return fmt.Errorf("sessionId cannot be empty")
 }
 
 func (sessionCache *MongoSessionCache) DeleteSessionData(sessionId string) error {
 	if sessionId != "" {
-		existing, _ := sessionCache.FindSessionDataForSessionId(sessionId)
-		if existing != nil {
-			sessionCache.MongoCache.Delete(existing)
+		sessionData, err := sessionCache.FindSessionDataForSessionId(sessionId)
+		if (err != nil) {
+			return err
+		}
+		if (sessionData != nil) {
+			err = sessionCache.MongoCache.Delete(sessionData)
+			if (err != nil) {
+				return err
+			}
 		}
 	}
 	return nil

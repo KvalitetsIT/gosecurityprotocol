@@ -33,7 +33,7 @@ func TestSessionDataHandlerGetSessionDataOldInterface(t *testing.T) {
 	assert.NilError(t, getError)
 	assert.Equal(t, getStatus, http.StatusOK)
 	assert.Assert(t, responseRecorder.Result() != nil)
-	assert.Equal(t, "{\"ID\":\"\",\"Sessionid\":\"sessionId1\",\"Authenticationtoken\":\"\",\"Timestamp\":\"0001-01-01T00:00:00Z\",\"Hash\":\"hash1\",\"UserAttributes\":null,\"SessionAttributes\":null,\"ClientCertHash\":\"\"}", readStringFromResponseBody(responseRecorder.Result()))
+	assert.Equal(t, "{\"ID\":null,\"Sessionid\":\"sessionId1\",\"Authenticationtoken\":\"\",\"Timestamp\":\"0001-01-01T00:00:00Z\",\"Hash\":\"hash1\",\"UserAttributes\":null,\"SessionAttributes\":null,\"ClientCertHash\":\"\"}", readStringFromResponseBody(responseRecorder.Result()))
 }
 
 func TestSessionDataHandlerGetSessionData(t *testing.T) {
@@ -58,7 +58,7 @@ func TestSessionDataHandlerGetSessionData(t *testing.T) {
 	assert.NilError(t, getError)
 	assert.Equal(t, getStatus, http.StatusOK)
 	assert.Assert(t, responseRecorder.Result() != nil)
-	assert.Equal(t, "{\"ID\":\"\",\"Sessionid\":\"sessionId1\",\"Authenticationtoken\":\"\",\"Timestamp\":\"0001-01-01T00:00:00Z\",\"Hash\":\"hash1\",\"UserAttributes\":null,\"SessionAttributes\":null,\"ClientCertHash\":\"\"}", readStringFromResponseBody(responseRecorder.Result()))
+	assert.Equal(t, "{\"ID\":null,\"Sessionid\":\"sessionId1\",\"Authenticationtoken\":\"\",\"Timestamp\":\"0001-01-01T00:00:00Z\",\"Hash\":\"hash1\",\"UserAttributes\":null,\"SessionAttributes\":null,\"ClientCertHash\":\"\"}", readStringFromResponseBody(responseRecorder.Result()))
 
 }
 
@@ -66,6 +66,7 @@ func TestSessionDataHandlerSetSessionAttributeOldInterface(t *testing.T) {
 
         // Given
         mongoSessionCache, createErr := NewMongoSessionCache("mongo", "testsessionapi", "session")
+	assert.NilError(t, createErr)
 
         sessionId := "session2"
         hash1 := "hash1"
@@ -90,7 +91,6 @@ func TestSessionDataHandlerSetSessionAttributeOldInterface(t *testing.T) {
 	gotSessionData, _ := mongoSessionCache.FindSessionDataForSessionId(sessionId)
 
         // Then
-        assert.NilError(t, createErr)
         assert.NilError(t, saveErr)
         assert.Assert(t, setHandlerFunction != nil)
         assert.NilError(t, setError)
