@@ -39,7 +39,7 @@ func (handler HttpHeaderSessionIdHandler) SetSessionIdOnHttpRequest(sessionId st
 	request.Header.Add(handler.HttpHeaderName, sessionId)
 }
 
-type MatchHandler func(r *http.Request) bool 
+type MatchHandler func(r *http.Request) bool
 
 func MatchAllHandler (r *http.Request) bool {
 	return true

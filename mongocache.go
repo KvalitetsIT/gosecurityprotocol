@@ -1,12 +1,18 @@
 package securityprotocol
 
-import "gopkg.in/mgo.v2"
-import "gopkg.in/mgo.v2/bson"
-import "time"
+
+import (
+    "go.mongodb.org/mongo-driver/mongo"
+    options "go.mongodb.org/mongo-driver/mongo/options"
+    bson "go.mongodb.org/mongo-driver/bson"
+    primitive "go.mongodb.org/mongo-driver/bson/primitive"
+    "context"
+    "time"
+    "fmt"
+)
 
 type MongoCache struct {
-	mongoSession    *mgo.Session
-	collection 	*mgo.Collection
+     	mongoClient     *mongo.Client
 	keyColumn	string
 	dbName        	string
 	collectionName 	string
@@ -17,24 +23,36 @@ func NewMongoCache(mongodb string, mongodb_database string, mongodb_collection s
 	return tokenCache, err
 }
 
-func (mongoCache *MongoCache) ReConnect() {
+/*func (mongoCache *MongoCache) ReConnect() {
 	mongoCache.mongoSession.Refresh()
 	mongoCache.collection = mongoCache.mongoSession.DB(mongoCache.dbName).C(mongoCache.collectionName)
+}
+*/
+func (mongoCache *MongoCache) getCollection() *mongo.Collection {
+
+	collection := mongoCache.mongoClient.Database(mongoCache.dbName).Collection(mongoCache.collectionName)
+	return collection
+}
+
+func getContext() context.Context {
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	return ctx
 }
 
 func newCache(mongodb string, dbName string, collectionName string, keyColumn string) (*MongoCache, error) {
 
-	session, err := mgo.Dial(mongodb)
-	if err != nil {
+	mongoClient, err := mongo.NewClient(options.Client().ApplyURI(fmt.Sprintf("mongodb://%s", mongodb)))
+	if (err != nil) {
+		return nil, err
+	}
+	ctx := getContext()
+	err = mongoClient.Connect(ctx)
+	if (err != nil) {
 		return nil, err
 	}
 
-	session.SetMode(mgo.Monotonic, true)
-
-	// Collection Sessions
-	c := session.DB(dbName).C(collectionName)
-
-	// Index
+/*	// Index
 	index := mgo.Index{
 		Key:        []string{ keyColumn },
 		Unique:     true,
@@ -57,57 +75,119 @@ func newCache(mongodb string, dbName string, collectionName string, keyColumn st
         if (err != nil) {
 		return nil, err
         }
+*/
+        mongoCache := MongoCache{ mongoClient: mongoClient, keyColumn: keyColumn, dbName: dbName, collectionName: collectionName }
+	mongoCache.EnsureIndexes()
 
-        return &MongoCache{ mongoSession: session, collection: c, keyColumn: keyColumn, dbName: dbName, collectionName: collectionName }, nil
+	return &mongoCache, nil
 }
 
-func (mongoCache *MongoCache) FindDataForSessionId(sessionKey string, sessionId string, object interface{}) (interface{}, error) {
-	if (sessionId == "") {
-		return nil, nil
-	}
+func (mongoCache *MongoCache) EnsureIndexes() ([]string, error) {
 
-	query := mongoCache.collection.Find(bson.M{sessionKey: sessionId})
-	count, err := query.Count()
-	if (err != nil) {
-		return nil, err
-	}
+	ttlName := "idx_session_ttl"
+	ukName := "idx_session_uk"
 
-	if (count == 1) {
-		err = query.One(object)
-		if (err != nil) {
-                	mongoCache.ReConnect()
-                	return nil, err
-        	}
-		return object, nil
-	}
-	return nil, nil
-}
-
-func (mongoCache *MongoCache) Delete(object interface{}) error {
-        err := mongoCache.collection.Remove(object)
-        if (err != nil) {
-                mongoCache.ReConnect()
-                return err
+        t := true
+	ctx := getContext()
+        ukIndexOptions := options.IndexOptions {
+		Name: &ukName,
+                Unique: &t,
         }
-        return nil
+        uniqueKeyIndexModel := mongo.IndexModel{
+                Keys: bson.M{ mongoCache.keyColumn: 1 },
+                Options: &ukIndexOptions,
+        }
+        _, err := mongoCache.getCollection().Indexes().CreateOne(ctx, uniqueKeyIndexModel)
+        if (err != nil) {
+                return nil, err
+        }
+
+        var expiryAfterSeconds int32
+        expiryAfterSeconds = 0
+        ttlIndexOptions := options.IndexOptions {
+		Name: &ttlName,
+                ExpireAfterSeconds: &expiryAfterSeconds,
+        }
+        ttlIndexModel := mongo.IndexModel{
+                Keys: bson.M{ "timestamp": 1 },
+                Options: &ttlIndexOptions,
+        }
+
+	opts := options.CreateIndexes().SetMaxTime(2 * time.Second)
+	return mongoCache.getCollection().Indexes().CreateMany(ctx, []mongo.IndexModel{ uniqueKeyIndexModel, ttlIndexModel }, opts)
 }
 
-func (mongoCache *MongoCache) Save(object interface{}) error {
-	err := mongoCache.collection.Insert(object)
-	if (err != nil) {
-		mongoCache.ReConnect()
-		return err
+func (mongoCache *MongoCache) FindDataForSessionId(sessionKey string, sessionId string, result interface{}) (bool, error) {
+	if (sessionId == "") {
+		return false, nil
 	}
-	return nil
+
+	collection := mongoCache.getCollection()
+	ctx := getContext()
+
+	cur, err := collection.Find(ctx, bson.M{sessionKey: sessionId})
+	if (err != nil) {
+		return false, err
+	}
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+   		err := cur.Decode(result)
+   		if (err != nil) {
+			return false, err
+		}
+		return true, nil
+	}
+	return false, nil
 }
 
-func (mongoCache *MongoCache) Close() {
-	mongoCache.mongoSession.Close()
+func (mongoCache *MongoCache) DeleteWithId(id primitive.ObjectID) error {
+
+	collection := mongoCache.getCollection()
+        ctx := getContext()
+
+	_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+
+        return err
+}
+
+
+func (mongoCache *MongoCache) Delete(object Identifiable) error {
+	collection := mongoCache.getCollection()
+        ctx := getContext()
+
+        _, err := collection.DeleteOne(ctx, object)
+        return err
+}
+
+func (mongoCache *MongoCache) Save(object interface{}, filterId Identifiable) error {
+
+	collection := mongoCache.getCollection()
+        ctx := getContext()
+
+	filter := bson.M{ mongoCache.keyColumn : filterId.GetKey() }
+
+	upsert := true
+	after := options.After
+	opt := options.FindOneAndReplaceOptions{
+		ReturnDocument: &after,
+		Upsert:         &upsert,
+	}
+
+	result := collection.FindOneAndReplace(ctx, filter, object, &opt)
+	if result.Err() != nil {
+		return result.Err()
+	}
+
+	decodeErr := result.Decode(object)
+	if (decodeErr != nil) {
+		return decodeErr
+	}
+
+	return nil
 }
 
 func GetExpiryDate(expiresIn int64) time.Time {
 
-        expiryTime := time.Now().Add(time.Duration(expiresIn) * time.Millisecond)
+        expiryTime := time.Now().Add(time.Duration(expiresIn) * time.Second)
         return expiryTime
 }
-

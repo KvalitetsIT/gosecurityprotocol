@@ -10,6 +10,7 @@ func TestMongoSessionCache(t *testing.T) {
 
 	// Given
 	mongoSessionCache, createErr := NewMongoSessionCache("mongo", "testsession", "session")
+	assert.NilError(t, createErr)
 
 	sessionId := uuid.New().String()
 	hash1 := "hash1"
@@ -20,20 +21,28 @@ func TestMongoSessionCache(t *testing.T) {
 
 	// When
 	saveFirstErr := mongoSessionCache.SaveSessionData(&sessionDataFirst)
+	assert.NilError(t, saveFirstErr)
+	assert.Assert(t, sessionDataFirst.GetID() != nil)
+
 	saveSecondErr := mongoSessionCache.SaveSessionData(&sessionDataSecond)
+	assert.NilError(t, saveSecondErr)
+	assert.Assert(t, sessionDataSecond.GetID() != nil)
+
+	assert.Equal(t, sessionDataFirst.GetID().Hex(), sessionDataSecond.GetID().Hex())
+
 	sessionDataGet, getErr := mongoSessionCache.FindSessionDataForSessionId(sessionId)
+	assert.NilError(t, getErr)
+	assert.Assert(t, sessionDataGet != nil)
+	assert.Equal(t, sessionDataFirst.GetID().Hex(), sessionDataGet.GetID().Hex())
+
 	mongoSessionCache.DeleteSessionData(sessionId)
-	sessionDataGetDeleted, _ := mongoSessionCache.FindSessionDataForSessionId(sessionId)
+	sessionDataGetDeleted, err := mongoSessionCache.FindSessionDataForSessionId(sessionId)
+	assert.NilError(t, err)
+	assert.Assert(t, sessionDataGetDeleted == nil)
 
 	// Then
-	assert.NilError(t, createErr)
-	assert.NilError(t, saveFirstErr)
-	assert.NilError(t, saveSecondErr)
-	assert.NilError(t, getErr)
-
 	assert.Equal(t, sessionId, sessionDataGet.Sessionid)
 	assert.Equal(t, hash2, sessionDataGet.Hash)
-	assert.Assert(t, sessionDataGetDeleted == nil)
 }
 
 /* TODO

@@ -5,14 +5,21 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	uuid "github.com/google/uuid"
-	"gopkg.in/mgo.v2/bson"
+	primitive "go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
 	"sort"
 	"time"
 )
 
+
+type Identifiable interface {
+	GetID() *primitive.ObjectID
+	GetKey() string
+}
+
 type SessionData struct {
-	ID                  bson.ObjectId `bson:"_id,omitempty"`
+	identifiable Identifiable
+	ID                  *primitive.ObjectID `bson:"_id,omitempty"`
 	Sessionid           string        `bson:"sessionid"`
 	Authenticationtoken string
 	Timestamp           time.Time `bson:"timestamp"`
@@ -51,6 +58,14 @@ func CreateSessionData(token string, userAttributes map[string][]string, expiry 
 
 	id := uuid.New().String()
 	return CreateSessionDataWithId(id, token, userAttributes, expiry, clientCertHash)
+}
+
+func (data SessionData) GetID() *primitive.ObjectID {
+	return data.ID
+}
+
+func (data SessionData) GetKey() string {
+	return data.Sessionid
 }
 
 func (data *SessionData) AddSessionAttribute(key string, value string) {

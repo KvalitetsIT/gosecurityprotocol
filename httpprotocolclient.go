@@ -49,6 +49,10 @@ func NewHttpProtocolClient(matchHandler MatchHandler, tokenCache TokenCache, ses
 	return httpProtocolClient
 }
 
+func (client HttpProtocolClient) GetSessionDataFetcher() *SessionDataFetcher {
+	return &client.sessionDataFetcher
+}
+
 func (client HttpProtocolClient) Handle(w http.ResponseWriter, r *http.Request) (int, error) {
 
 	if (!client.matchHandler(r)) {

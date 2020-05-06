@@ -62,6 +62,7 @@ func handleRequestForSessionData(sessionData *SessionData, w http.ResponseWriter
         if (marshalErr != nil) {
                 return http.StatusInternalServerError, marshalErr
         }
+	w.Header().Set("Content-Type", "application/json")
         w.Write(sessionDataBytes)
 
         return http.StatusOK, nil

@@ -13,6 +13,7 @@ require (
 	go.uber.org/atomic v1.5.0
 	go.uber.org/multierr v1.3.0
 	go.uber.org/zap v1.13.0
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gotest.tools v2.2.0+incompatible
+
+	go.mongodb.org/mongo-driver v1.3.2
 )

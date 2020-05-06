@@ -6,11 +6,17 @@ import (
 	"fmt"
 	"time"
         "gotest.tools/assert"
+	primitive "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MockTokenCache struct {
 
 }
+
+func (tokenCache *MockTokenCache) DeleteTokenDataWithId(id primitive.ObjectID) error {
+	return nil
+}
+
 
 func (tokenCache *MockTokenCache) FindTokenDataForSessionId(sessionId string) (*TokenData, error) {
         result := TokenData{ Sessionid: sessionId, Hash: "hash" }
@@ -20,10 +26,14 @@ func (tokenCache *MockTokenCache) FindTokenDataForSessionId(sessionId string) (*
 func (tokenCache *MockTokenCache) SaveAuthenticationKeysForSessionId(sessionId string, authenticationToken string, expires_in int64, hash string) (*TokenData, error) {
 
 	expiryTime := time.Now() //GetExpiryDate(expires_in)
-	tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
-	return tokenData, nil
+	return tokenCache.SaveAuthenticationKeysForSessionIdWithExpiry(sessionId, authenticationToken, expiryTime, hash)
 }
 
+
+func (tokenCache *MockTokenCache) SaveAuthenticationKeysForSessionIdWithExpiry(sessionId string, authenticationToken string, expiryTime time.Time, hash string) (*TokenData, error) {
+	tokenData := &TokenData{ Sessionid: sessionId, Authenticationtoken: authenticationToken, Timestamp: expiryTime, Hash: hash  }
+        return tokenData, nil
+}
 
 type MockService struct {
 
