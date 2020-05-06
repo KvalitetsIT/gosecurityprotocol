@@ -20,15 +20,15 @@ podTemplate(
 			  docker.build("kvalitetsit/gosecurityprotocol", "--network testenv_gosecurityprotocol -f Dockerfile .")
 			}
 		}
-	}
-	post {
-		always {
-            container('docker') {
-                dir('testenv') {
-                    sh 'docker-compose stop'
-                    sh 'docker-compose rm -f'
+        post {
+            always {
+                container('docker') {
+                    dir('testenv') {
+                        sh 'docker-compose stop'
+                        sh 'docker-compose rm -f'
+                    }
                 }
             }
-		}
+        }
 	}
 }
