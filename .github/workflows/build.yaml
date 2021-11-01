@@ -12,11 +12,12 @@ jobs:
       # Checkout source code
       - uses: actions/checkout@v2
 
+      - name: Create docker network
+        run: docker network create testenv_gosecurityprotocol
+
       - name: Startup the testenvironment used by the integration tests
         run: docker-compose up -d
         working-directory: testenv
 
       - name: Build Docker image
-        run: docker build -t gosecurityprotocol --network testenv_gosecurityprotocol .
-        working-directory: gosecurityprotocol
-    
+        run: docker build -t gosecurityprotocol --network testenv_gosecurityprotocol .    
