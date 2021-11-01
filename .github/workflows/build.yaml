@@ -20,4 +20,4 @@ jobs:
         working-directory: testenv
 
       - name: Build Docker image
-        run: docker build -t gosecurityprotocol --network testenv_gosecurityprotocol .    
+        run: docker build -t kvalitetsit/gosecurityprotocol --network testenv_gosecurityprotocol .    
