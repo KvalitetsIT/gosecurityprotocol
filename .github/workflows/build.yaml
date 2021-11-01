@@ -1,0 +1,22 @@
+name: Build Action - GoSecurityProtocol
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      # Checkout source code
+      - uses: actions/checkout@v2
+
+      - name: Startup the testenvironment used by the integration tests
+        run: docker-compose up -d
+        working-directory: testenv
+
+      - name: Build Docker image
+        run: docker build -t gosecurityprotocol --network testenv_gosecurityprotocol .
+        working-directory: gosecurityprotocol
+    
