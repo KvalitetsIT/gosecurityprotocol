@@ -7,17 +7,22 @@ replace github.com/russellhaering/goxmldsig => github.com/evtr/goxmldsig v0.0.0-
 require (
 	github.com/google/uuid v1.3.0
 	github.com/russellhaering/gosaml2 v0.7.0
-	go.mongodb.org/mongo-driver v1.9.0
+	go.mongodb.org/mongo-driver v1.9.1
 	go.uber.org/zap v1.21.0
 	gotest.tools v2.2.0+incompatible
+)
+
+require (
+	github.com/jonboulle/clockwork v0.3.0 // indirect
+	github.com/mattermost/xml-roundtrip-validator v0.1.0 // indirect
 )
 
 require (
 	github.com/beevik/etree v1.1.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/go-cmp v0.5.2 // indirect
-	github.com/klauspost/compress v1.15.1 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/klauspost/compress v1.15.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russellhaering/goxmldsig v1.2.0
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
@@ -26,7 +31,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29 // indirect
+	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
