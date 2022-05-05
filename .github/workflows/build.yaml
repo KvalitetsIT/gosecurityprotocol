@@ -1,16 +1,25 @@
 name: Build Action - GoSecurityProtocol
 
 on:
+  pull_request: ~
   push:
     branches: [ master ]
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       # Checkout source code
       - uses: actions/checkout@v2
+
+      # if below step is skipped this build is a tag build. Can be used for skipping other steps.
+      - name: Is Tag Build
+        id: tag
+        if:  ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
       - name: Create docker network
         run: docker network create testenv_gosecurityprotocol
@@ -20,4 +29,10 @@ jobs:
         working-directory: testenv
 
       - name: Build Docker image
-        run: docker build -t kvalitetsit/gosecurityprotocol --network testenv_gosecurityprotocol .    
+        run: docker build -t kvalitetsit/gosecurityprotocol --network testenv_gosecurityprotocol .
+
+      - name: Create Release Notes
+        uses: softprops/action-gh-release@v1
+        if: ${{ steps.tag.conclusion != 'skipped' }}
+        with:
+          generate_release_notes: true
